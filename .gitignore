@@ -9,3 +9,8 @@ _design
 *.zip
 *.tsbuildinfo
 .claude/settings.local.json
+reportes
+test-results
+playwright-report
+coverage
+.env*.local
