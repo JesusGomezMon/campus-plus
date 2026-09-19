@@ -96,7 +96,8 @@ npm audit                  # vulnerabilidades en dependencias`));
     ["E2E · accesibilidad WCAG AA (teléfono y tableta)", casosE2E.filter((x) => x.archivo.includes("accesibilidad")).length, casosE2E.filter((x) => x.archivo.includes("accesibilidad") && x.estado === "passed").length, 0, seg(casosE2E.filter((x) => x.archivo.includes("accesibilidad")).reduce((t, x) => t + x.ms, 0))],
     ["**Total**", `**${total}**`, `**${ok}**`, `**${total - ok}**`, ""]
   ], [46, 12, 14, 12, 16]));
-  c.push(p("Para descartar pruebas intermitentes, la suite completa se ejecutó tres veces seguidas con medición de cobertura: 3 de 3 ejecuciones aprobadas."));
+  c.push(p("Para descartar pruebas intermitentes, la suite completa se ejecutó tres veces seguidas: 3 de 3 ejecuciones aprobadas."));
+  c.push(p("**Integración continua:** GitHub Actions ejecuta auditoría, compilación, pruebas y E2E en cada push. En el historial se ve su valor: una ejecución falló por la prueba intermitente D-07 en un commit anterior a la corrección, y la ejecución sobre la versión final (v1.0.0) terminó en verde. Enlace: " + "https://github.com/JesusGomezMon/campus-plus/actions"));
 
   c.push(h1("4. Detalle de los casos de prueba"));
   const estado = (s) => (s === "passed" ? "Aprobada" : s === "skipped" || s === "pending" ? "Omitida" : "Fallida");
@@ -180,7 +181,7 @@ npm audit                  # vulnerabilidades en dependencias`));
     ["D-04", "No había forma de salir de un perfil.", "Media", "Prueba de navegación", "El prototipo no lo contemplaba. Se agregó «Cerrar sesión».", "Corregido"],
     ["D-05", "Un estudiante que terminaba una actividad de grupo la terminaba para todos.", "Alta", "Análisis del modelo de datos", "Estado único por actividad. Se creó la tabla asignaciones con estado por estudiante.", "Corregido"],
     ["D-06", "vercel.json con JSON inválido (escape \\.): el despliegue habría fallado.", "Crítica", "Servidor local con los encabezados de producción", "Secuencia de escape incorrecta. Se corrigió y se agregó una prueba que valida el archivo.", "Corregido"],
-    ["D-07", "Prueba de interfaz intermitente.", "Media", "Medición de cobertura", "La prueba leía la lista antes de terminar la carga. Ahora espera los datos; 3 corridas estables.", "Corregido"],
+    ["D-07", "Prueba de interfaz intermitente.", "Media", "Medición de cobertura y, de forma independiente, GitHub Actions", "La prueba leía la lista antes de terminar la carga. Ahora espera los datos; 3 corridas estables y CI en verde.", "Corregido"],
     ["D-08", "Contraste de 3.47:1 en botones verdes (mínimo 4.5:1).", "Media", "Lighthouse", "Color del prototipo. Se usó #17833C (4.83:1) y se agregó auditoría axe por pantalla.", "Corregido"],
     ["D-09", "robots.txt inexistente.", "Baja", "Lighthouse", "El servidor devolvía la página HTML. Se agregó el archivo.", "Corregido"],
     ["D-10", "Variables NEXT_PUBLIC_* no reconocidas.", "Media", "Verificación de configuración", "Se copiaron con el formato de otro framework. Se renombraron a VITE_* y se documentó.", "Corregido"],
