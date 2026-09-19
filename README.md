@@ -50,8 +50,3 @@ public/               íconos y favicon de la PWA
 vercel.json           configuración de Vercel
 ```
 
-## Siguientes pasos sugeridos
-
-- Backend y base de datos compartida (p. ej. Supabase o Vercel Postgres) para que los datos se sincronicen entre dispositivos.
-- Inicio de sesión real con cuentas institucionales y permisos por rol.
-- Notificaciones push para actividades próximas a vencer.
