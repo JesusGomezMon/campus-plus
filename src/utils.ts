@@ -1,4 +1,4 @@
-import type { Actividad, Estado } from "./data/types";
+import type { Actividad, Estado } from "./domain/tipos";
 
 const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
 
@@ -30,9 +30,4 @@ export function iniciales(nombre: string): string {
 
 export function primerNombre(nombre: string): string {
   return nombre.replace(/^(Mtro\.|Mtra\.)\s*/, "").split(" ")[0];
-}
-
-/** Ordena por fecha y hora ascendente. */
-export function porFecha(a: Actividad, b: Actividad): number {
-  return (a.fecha + a.hora).localeCompare(b.fecha + b.hora);
 }

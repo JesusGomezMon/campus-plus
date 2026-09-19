@@ -1,7 +1,7 @@
-import { useEffect, useRef } from "react";
-import type { Actividad, Estado } from "../data/types";
-import { ESTADOS } from "../data/seed";
-import { useStore } from "../store";
+import { useEffect, useRef, type ReactNode } from "react";
+import type { Consulta } from "../app/contexto";
+import { useApp } from "../app/contexto";
+import { ESTADOS, type ActividadAlumno, type Estado } from "../domain/tipos";
 import { fechaHora, tagClass } from "../utils";
 
 export type Filtro = "Todas" | Estado;
@@ -9,16 +9,9 @@ const FILTROS: Filtro[] = ["Todas", ...ESTADOS];
 
 export function Filtros({ value, onChange }: { value: Filtro; onChange: (f: Filtro) => void }) {
   return (
-    <div className="chips" role="tablist" aria-label="Filtrar por estado">
+    <div className="chips" role="group" aria-label="Filtrar por estado">
       {FILTROS.map((f) => (
-        <button
-          key={f}
-          type="button"
-          role="tab"
-          aria-selected={value === f}
-          className={"chip" + (value === f ? " is-on" : "")}
-          onClick={() => onChange(f)}
-        >
+        <button key={f} type="button" aria-pressed={value === f} className={"chip" + (value === f ? " is-on" : "")} onClick={() => onChange(f)}>
           {f}
         </button>
       ))}
@@ -40,7 +33,7 @@ export function PillButton({ titulo, subtitulo, onClick }: { titulo: string; sub
   );
 }
 
-export function ActividadResumen({ a }: { a: Actividad }) {
+export function ActividadResumen({ a }: { a: ActividadAlumno }) {
   return (
     <>
       <span className="card-title">{a.titulo}</span>
@@ -50,7 +43,7 @@ export function ActividadResumen({ a }: { a: Actividad }) {
   );
 }
 
-export function Datos({ items }: { items: { label: string; value: React.ReactNode }[] }) {
+export function Datos({ items }: { items: { label: string; value: ReactNode }[] }) {
   return (
     <dl className="datos">
       {items.map((d) => (
@@ -63,8 +56,28 @@ export function Datos({ items }: { items: { label: string; value: React.ReactNod
   );
 }
 
-export function Vacio({ children }: { children: React.ReactNode }) {
+export function Vacio({ children }: { children: ReactNode }) {
   return <p className="empty">{children}</p>;
+}
+
+/** Muestra carga / error / contenido de una consulta al repositorio. */
+export function ConDatos<T>({ consulta, children }: { consulta: Consulta<T>; children: (datos: T) => ReactNode }) {
+  if (consulta.datos !== undefined) return <>{children(consulta.datos)}</>;
+  if (consulta.error)
+    return (
+      <div className="estado-carga" role="alert">
+        <p>{consulta.error}</p>
+        <button type="button" className="btn btn-secondary" onClick={consulta.reintentar}>
+          Reintentar
+        </button>
+      </div>
+    );
+  return (
+    <div className="estado-carga" aria-busy="true">
+      <span className="spinner" aria-hidden="true" />
+      <span className="sr-only">Cargando…</span>
+    </div>
+  );
 }
 
 export function ConfirmDialog({
@@ -103,10 +116,10 @@ export function ConfirmDialog({
 }
 
 export function Toast() {
-  const { toast } = useStore();
+  const { toast } = useApp();
   return (
-    <div className="toast-region" aria-live="polite">
-      {toast && <div className="toast">{toast}</div>}
+    <div className="toast-region" aria-live="polite" role="status">
+      {toast && <div className={"toast" + (toast.tipo === "error" ? " toast-error" : "")}>{toast.texto}</div>}
     </div>
   );
 }

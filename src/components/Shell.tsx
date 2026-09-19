@@ -1,6 +1,7 @@
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { USUARIOS } from "../data/seed";
-import type { Rol } from "../data/types";
+import type { ReactNode } from "react";
+import { Navigate, NavLink, Outlet, useNavigate } from "react-router-dom";
+import { useApp } from "../app/contexto";
+import type { Rol } from "../domain/tipos";
 
 const TABS: Record<Rol, { label: string; to: string; end?: boolean; aria?: string }[]> = {
   estudiante: [
@@ -18,15 +19,31 @@ const TABS: Record<Rol, { label: string; to: string; end?: boolean; aria?: strin
   ]
 };
 
-/** Estructura común de los perfiles: usuario arriba, contenido y barra inferior. */
+/**
+ * Estructura común de los perfiles: usuario arriba, contenido y barra inferior.
+ * También protege las rutas: solo entra quien tiene sesión con el rol correspondiente.
+ */
 export function Shell({ rol }: { rol: Rol }) {
   const navigate = useNavigate();
+  const { usuario, cargandoSesion, salir } = useApp();
+
+  if (cargandoSesion) return <div className="app" aria-busy="true" />;
+  if (!usuario) return <Navigate to="/" replace />;
+  if (usuario.rol !== rol) return <Navigate to={`/${usuario.rol}`} replace />;
+
   return (
     <div className="app">
       <div className="userbar">
-        <span>{USUARIOS[rol]}</span>
-        <button type="button" className="link-btn" onClick={() => navigate("/")}>
-          Cambiar perfil
+        <span>{usuario.nombre}</span>
+        <button
+          type="button"
+          className="link-btn"
+          onClick={async () => {
+            await salir();
+            navigate("/", { replace: true });
+          }}
+        >
+          Cerrar sesión
         </button>
       </div>
       <Outlet />
@@ -50,7 +67,7 @@ export function Shell({ rol }: { rol: Rol }) {
 }
 
 /** Banda de título + contenido de la pantalla. */
-export function Screen({ title, children }: { title: string; children: React.ReactNode }) {
+export function Screen({ title, children }: { title: string; children: ReactNode }) {
   return (
     <>
       <header className="title-band">
