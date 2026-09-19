@@ -1,57 +1,74 @@
-# Campus + (v1)
+# Campus+ (v1)
 
-Aplicación web progresiva (PWA) para el seguimiento de actividades académicas, pensada para teléfonos y tablets. Tiene tres perfiles:
+Aplicación web progresiva (PWA) para gestionar actividades (tareas) entre tres roles. Está pensada principalmente para teléfonos y tabletas.
 
-- **Estudiante**: consulta sus próximas actividades, las filtra por estado y cambia su estado (Pendiente / En proceso / Terminada).
-- **Profesor**: registra, edita y elimina actividades, y asigna cada una a un estudiante o al grupo completo.
-- **Tutor**: consulta a sus tutorados y las actividades asignadas a cada uno.
+- **Estudiante:** consulta sus próximas actividades, las filtra por estado y actualiza su avance (Pendiente / En proceso / Terminada).
+- **Profesor:** registra, edita y elimina actividades para un estudiante o para todo el grupo, y ve el avance de cada estudiante.
+- **Tutor:** consulta a sus tutorados y el estado de sus actividades.
 
-Está basada en el diseño `Campus+ V2 Movil` (12 pantallas).
+Tecnologías: React 19 + TypeScript + Vite · PostgreSQL en Supabase (autenticación y Row Level Security) · Vercel.
 
-## Alcance de la versión 1
-
-- No tiene backend ni inicio de sesión: los perfiles se eligen en la pantalla de inicio y los usuarios son de demostración (`src/data/seed.ts`).
-- Los cambios se guardan en el navegador (`localStorage`) de cada dispositivo. Desde la pantalla de inicio se pueden restablecer los datos de ejemplo.
-- Funciona sin conexión una vez cargada, y se puede instalar en la pantalla de inicio (Android/Chrome: botón «Instalar aplicación»; iPhone/iPad: Compartir → Agregar a inicio).
-
-## Desarrollo
+## Puesta en marcha
 
 Requiere Node.js 20 o superior.
 
 ```bash
 npm install
-npm run dev       # servidor de desarrollo (http://localhost:5173)
-npm run build     # compilación de producción en dist/
-npm run preview   # sirve dist/ con el service worker activo (http://localhost:4173)
-npm run icons     # regenera los íconos PNG desde public/favicon.svg
+cp .env.example .env.local   # llena VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY
+npm run dev                  # http://localhost:5173 (también accesible desde tu red local)
 ```
 
-`dev` y `preview` usan `--host`, así que puedes abrir la app desde tu teléfono en la misma red Wi‑Fi usando la IP de tu computadora.
+Si no hay configuración de Supabase, la app arranca en **modo demostración**: eliges un perfil sin contraseña y los datos se guardan en el navegador.
+
+### Base de datos (Supabase)
+
+1. Crea un proyecto en supabase.com.
+2. En *SQL Editor*, ejecuta **una sola vez** el archivo `supabase/migrations/0001_esquema.sql`. Crea las tablas, las políticas RLS, las funciones y la auditoría.
+3. En `.env.local` agrega `SUPABASE_SERVICE_ROLE_KEY` y `SEED_PASSWORD`. Estas variables solo sirven para cargar datos y **nunca** se suben al repositorio ni a Vercel.
+4. Carga las cuentas de prueba y las actividades de ejemplo con `npm run db:seed`.
+5. Comprueba la seguridad con cada rol contra la base real con `npm run db:verificar`.
+
+Cuentas de prueba (todas con la contraseña `SEED_PASSWORD`): `profesor@`, `tutor@`, `ana@`, `luis@`, `marisol@` y `diego@campusplus.test`.
+
+## Scripts
+
+| Comando | Qué hace |
+|---|---|
+| `npm run dev` / `npm run build` / `npm run preview` | Desarrollo, compilación de producción y vista previa |
+| `npm test` | Pruebas unitarias, de base de datos (PostgreSQL en memoria) y de interfaz |
+| `npm run test:integracion` | Pruebas del adaptador contra Supabase real |
+| `npm run test:e2e` | Playwright en teléfono y tableta: flujos, PWA, seguridad y accesibilidad |
+| `npm run test:cobertura` | Cobertura de código |
+| `npm run db:seed` · `db:verificar` · `db:medir` | Datos de ejemplo, verificación de RLS y medición de latencia |
+| `npm run verificar` | Compilación + pruebas + E2E |
 
 ## Despliegue en Vercel
 
-1. Sube el proyecto a un repositorio de GitHub.
-2. En Vercel, **Add New → Project** e importa el repositorio. Vercel detecta Vite automáticamente (`vercel.json` ya define el build, la carpeta `dist` y las reglas de rutas para la SPA).
-3. Despliega. No se necesitan variables de entorno.
-
-También se puede desplegar con la CLI: `npx vercel` (vista previa) o `npx vercel --prod`.
+1. Importa el repositorio en Vercel. Detecta Vite solo, y `vercel.json` ya define las rutas de la SPA y los encabezados de seguridad (CSP y HSTS).
+2. Agrega las variables `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY`.
+3. Presiona *Deploy*. Cada push a `main` vuelve a desplegar.
 
 ## Estructura
 
 ```
 src/
-  main.tsx            rutas de la app
-  store.tsx           estado de actividades y persistencia local
-  data/               tipos y datos de demostración
-  components/         estructura (Shell) y componentes compartidos
-  screens/            pantallas: Home, Estudiante, Profesor, Tutor
-  styles.css          estilos (colores y medidas del diseño)
-public/               íconos y favicon de la PWA
-vercel.json           configuración de Vercel
+  app/          rutas, sesión y acceso a datos desde la UI
+  components/   estructura (Shell con guardia por rol) y componentes
+  domain/       tipos y reglas de negocio (sin dependencias)
+  data/         puerto Repositorio y adaptadores Supabase / memoria
+  screens/      pantallas de cada rol
+supabase/       migración SQL
+tests/          unitarias, base de datos, interfaz e integración
+e2e/            pruebas de extremo a extremo y accesibilidad
+docs/           documentación de la entrega, diagramas y capturas
 ```
 
-## Siguientes pasos sugeridos
+## Documentación
 
-- Backend y base de datos compartida (p. ej. Supabase o Vercel Postgres) para que los datos se sincronicen entre dispositivos.
-- Inicio de sesión real con cuentas institucionales y permisos por rol.
-- Notificaciones push para actividades próximas a vencer.
+Los documentos de la entrega (requerimientos, diseño, código, gestión de datos y pruebas) se generan con:
+
+```bash
+node docs/generador/generar.mjs
+```
+
+Los archivos quedan en `docs/entregables/`. Antes de generarlos hay que ejecutar las pruebas con sus reportes (ver `docs/generador/`).
