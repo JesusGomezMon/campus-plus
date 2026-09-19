@@ -14,3 +14,6 @@ test-results
 playwright-report
 coverage
 .env*.local
+
+# Documentos generados (se entregan aparte)
+docs/entregables

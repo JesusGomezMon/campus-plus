@@ -62,11 +62,64 @@ describe("Acceso y navegación", () => {
   });
 });
 
+describe("Inicio de sesión (modo Supabase)", () => {
+  /** Repositorio que se comporta como Supabase: exige correo y contraseña. */
+  function repoConLogin() {
+    const base = new MemoriaRepo(almacen());
+    const repo = Object.assign(Object.create(base), { modo: "supabase" as const }) as MemoriaRepo;
+    repo.iniciarSesion = async (c) => {
+      if ("rol" in c) throw new ErrorDominio("Inicia sesión con tu correo y contraseña.", "sesion");
+      if (c.email !== "profesor@campusplus.test" || c.password !== "clave-correcta") throw new ErrorDominio("Correo o contraseña incorrectos.", "sesion");
+      return base.iniciarSesion({ rol: "profesor" });
+    };
+    return repo;
+  }
+
+  it("muestra el formulario y valida campos vacíos", async () => {
+    const { user } = montar("/", repoConLogin());
+    await user.click(await screen.findByRole("button", { name: "Entrar" }));
+    expect(screen.getByRole("alert")).toHaveTextContent("Escribe tu correo y contraseña.");
+  });
+
+  it("rechaza credenciales incorrectas sin revelar cuál dato falló", async () => {
+    const { user } = montar("/", repoConLogin());
+    await user.type(await screen.findByLabelText("Correo"), "profesor@campusplus.test");
+    await user.type(screen.getByLabelText("Contraseña"), "otra");
+    await user.click(screen.getByRole("button", { name: "Entrar" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Correo o contraseña incorrectos.");
+    expect(screen.getByLabelText("Contraseña")).toHaveAttribute("type", "password");
+  });
+
+  it("con credenciales válidas entra al inicio de su rol", async () => {
+    const { user } = montar("/", repoConLogin());
+    await user.type(await screen.findByLabelText("Correo"), "profesor@campusplus.test");
+    await user.type(screen.getByLabelText("Contraseña"), "clave-correcta");
+    await user.click(screen.getByRole("button", { name: "Entrar" }));
+    expect(await screen.findByText("Hola, Jorge!")).toBeInTheDocument();
+  });
+});
+
+describe("Datos de demostración", () => {
+  it("restablece los datos tras confirmar", async () => {
+    const repo = new MemoriaRepo(almacen());
+    const prof = await repo.iniciarSesion({ rol: "profesor" });
+    await repo.eliminarActividad(prof, 1);
+    await repo.cerrarSesion();
+    const { user } = montar("/", repo);
+    await user.click(await screen.findByRole("button", { name: "Restablecer datos de demostración" }));
+    await user.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Restablecer" }));
+    expect(await screen.findByText("Datos restablecidos")).toBeInTheDocument();
+    expect((await repo.actividadesProfesor(prof)).some((a) => a.id === 1)).toBe(true);
+  });
+});
+
 describe("Flujo del estudiante", () => {
   it("ve próximas actividades, entra al detalle y cambia el estado", async () => {
     const { user } = montar();
     await user.click(await screen.findByRole("button", { name: /Estudiante/ }));
     expect(await screen.findByText("Hola, Ana!")).toBeInTheDocument();
+    // El saludo aparece antes que los datos: esperar a que termine la carga.
+    await screen.findByRole("button", { name: /Ejercicio de Matemáticas/ });
 
     const proximas = screen.getAllByRole("button").filter((b) => b.classList.contains("pill"));
     expect(proximas.map((b) => within(b).getAllByText(/./)[0].textContent)).toEqual([
