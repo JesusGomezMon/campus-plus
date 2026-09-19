@@ -283,12 +283,13 @@ const diagramas = {};
     b += n(x, 205, C.azul) + texto(x, abajo ? 235 : 185, h, { size: 10.5, color: C.gris }) + texto(x, abajo ? 250 : 170, l, { size: 10.5, color: C.azul });
   });
   b += n(860, 105, C.verde) + texto(860, 85, "40a496c merge", { size: 11, color: C.gris });
-  const docs = [["1271325", "prueba intermitente"], ["cb62a61", "accesibilidad AA"], ["docs", "documentación"]];
+  const docs = [["1271325", "prueba intermitente"], ["cb62a61", "accesibilidad AA"], ["2ce6ed7", "documentación"]];
   docs.forEach(([h, l], i) => {
     const x = 965 + i * 70;
     b += n(x, 290, C.oro) + texto(x, 320, h, { size: 10.5, color: C.gris }) + texto(x, i % 2 ? 350 : 335, l, { size: 10.5, color: C.oro });
   });
-  b += n(1180, 105, C.verde) + texto(1180, 85, "merge v1.0", { size: 11, color: C.gris });
+  b += n(1020, 105, C.verde) + texto(1020, 85, "12bdcc0", { size: 11, color: C.gris }) + texto(1020, 135, "README (GitHub)", { size: 11, color: C.verdeO });
+  b += n(1180, 105, C.verde) + texto(1180, 85, "13ed376 merge v1.0", { size: 11, color: C.gris });
 
   const etapas = [["Commit / push", "Conventional Commits"], ["GitHub Actions", "npm ci + npm audit"], ["Compilación", "tsc + vite build"], ["Pruebas", "unitarias, BD, UI, E2E"], ["Vercel", "despliegue automático"]];
   etapas.forEach(([t, s], i) => {
