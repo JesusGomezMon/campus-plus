@@ -1,0 +1,11 @@
+node_modules
+dist
+dev-dist
+.vercel
+*.log
+.DS_Store
+# Material de diseño original (referencia local)
+_design
+*.zip
+*.tsbuildinfo
+.claude/settings.local.json
