@@ -7,241 +7,201 @@ export async function generar() {
   // 1
   c.push(h1("1. Introducción"));
   c.push(h2("1.1 Propósito del documento"));
-  c.push(p("Este documento define los requerimientos de **Campus+**, una aplicación de gestión de tareas (actividades académicas) para una organización con tres tipos de usuario: quien asigna el trabajo (profesor), quien lo ejecuta (estudiante) y quien supervisa el desempeño (tutor). Sirve como base para el diseño, el desarrollo, la gestión de datos y las pruebas, y permite rastrear cada requerimiento hasta su implementación y su evidencia de prueba."));
+  c.push(p("Aquí escribo qué debe hacer **Campus+**, una aplicación para organizar actividades escolares. La usan tres tipos de usuario: el profesor, que deja las actividades; el estudiante, que las hace; y el tutor, que da seguimiento. Lo hice antes de programar, para tener claro el alcance."));
   c.push(h2("1.2 Alcance"));
-  c.push(p("La versión 1 (V1) es una aplicación web progresiva (PWA) instalable, pensada principalmente para teléfonos y tabletas, con base de datos en la nube y autenticación. Incluye el registro, edición y eliminación de actividades; la asignación a un estudiante o a todo el grupo; el seguimiento del avance por parte del estudiante y la consulta de tutorados por parte del tutor."));
-  c.push(p("Quedan fuera de V1 (se documentan como trabajo futuro en la sección 11): notificaciones, carga de archivos de entrega, calificaciones, administración de usuarios desde la aplicación y reportes exportables."));
+  c.push(p("La versión 1 (V1) es una aplicación web que se puede instalar en el teléfono (PWA), con base de datos en la nube e inicio de sesión. Incluye registrar, editar y eliminar actividades, asignarlas a un estudiante o a todo el grupo, que el estudiante marque su avance y que el tutor consulte a sus tutorados."));
+  c.push(p("No entran en esta versión: notificaciones, subir archivos de entrega, calificaciones y administrar usuarios desde la app (sección 11)."));
   c.push(h2("1.3 Definiciones"));
   c.push(tituloTabla("Glosario"));
   c.push(tabla(["Término", "Definición"], [
-    ["Actividad", "Tarea con nombre, descripción, materia, fecha y hora de entrega, registrada por un profesor. Equivale a una «tarea» en una empresa."],
-    ["Asignación", "Relación entre una actividad y un estudiante; guarda el estado de avance propio de ese estudiante."],
-    ["Estado", "Avance de una asignación: Pendiente, En proceso o Terminada."],
-    ["Grupo completo", "Destinatario que asigna la actividad a todos los estudiantes."],
-    ["Tutorado", "Estudiante asignado a un tutor para su seguimiento."],
-    ["PWA", "Aplicación web progresiva: se instala desde el navegador y funciona sin conexión para la interfaz."],
-    ["RLS", "Row Level Security: políticas de PostgreSQL que limitan qué filas puede ver o modificar cada usuario."],
-    ["MoSCoW", "Técnica de priorización: Must (debe), Should (debería), Could (podría), Won't (no en esta versión)."]
+    ["Actividad", "Tarea con nombre, materia y fecha de entrega, que registra un profesor."],
+    ["Asignación", "La relación entre una actividad y un estudiante. Ahí se guarda el avance de ese estudiante."],
+    ["Estado", "Cómo va una asignación: Pendiente, En proceso o Terminada."],
+    ["PWA", "Aplicación web que se instala desde el navegador y abre aunque no haya internet."],
+    ["RLS", "Reglas de PostgreSQL que deciden qué filas puede ver o cambiar cada usuario."],
+    ["MoSCoW", "Forma de priorizar: Must (debe), Should (debería), Could (podría), Won't (no en esta versión)."]
   ], [22, 78]));
 
   // 2
   c.push(h1("2. Contexto del negocio"));
   c.push(h2("2.1 Problema"));
-  c.push(p("En la organización cliente el seguimiento de tareas se hace por canales dispersos (mensajería, correo, listas personales). Esto provoca que:"));
+  c.push(p("Hoy las tareas se avisan por muchos lados distintos: mensajes, correo, libretas. Eso hace que:"));
   c.push(...vinetas([
-    "Las personas que ejecutan el trabajo no tienen una vista única de lo que deben entregar ni de las fechas límite.",
-    "Quien asigna las tareas no sabe, sin preguntar uno por uno, cuánto avance lleva cada persona.",
-    "Los supervisores (tutores) no tienen visibilidad del trabajo de sus supervisados y detectan tarde los retrasos.",
-    "La información vive en dispositivos personales, sin control de acceso ni respaldo."
+    "El estudiante no tenga un solo lugar donde ver todo lo que debe entregar y para cuándo.",
+    "El profesor no sepa cómo va cada quien si no le pregunta uno por uno.",
+    "El tutor se entere tarde de los atrasos de sus tutorados.",
+    "Todo quede en el teléfono de cada persona, sin respaldo."
   ]));
-  c.push(h2("2.2 Objetivos de negocio"));
-  c.push(tituloTabla("Objetivos de negocio e indicadores"));
+  c.push(h2("2.2 Objetivos"));
+  c.push(tituloTabla("Objetivos y cómo sé si se cumplieron"));
   c.push(tabla(["ID", "Objetivo", "Indicador de éxito"], [
-    ["OBJ-1", "Centralizar el registro y seguimiento de actividades en una sola herramienta.", "100 % de las actividades del grupo registradas en Campus+."],
-    ["OBJ-2", "Dar visibilidad del avance a quien asigna y a quien supervisa.", "El profesor consulta el avance por estudiante sin contactarlo; el tutor ve el estado de cada tutorado."],
-    ["OBJ-3", "Permitir el uso desde el teléfono, en cualquier lugar.", "Aplicación instalable y usable en pantallas de 360 px o más; puntuación Lighthouse ≥ 90."],
-    ["OBJ-4", "Proteger la información y separar lo que puede ver cada rol.", "Ningún usuario puede leer o modificar datos fuera de su rol (verificado con pruebas de seguridad)."],
-    ["OBJ-5", "Entregar una V1 funcional que pueda crecer.", "Arquitectura en capas y pruebas automatizadas que permitan agregar funciones sin regresiones."]
-  ], [10, 50, 40]));
+    ["OBJ-1", "Tener las actividades en un solo lugar.", "Que todas las actividades del grupo se registren en Campus+."],
+    ["OBJ-2", "Que el profesor y el tutor puedan ver el avance.", "El profesor revisa cómo va cada estudiante sin preguntarle."],
+    ["OBJ-3", "Que se pueda usar desde el teléfono.", "La app se instala y se ve bien en pantallas chicas."],
+    ["OBJ-4", "Cuidar la información y separar lo que ve cada rol.", "Que nadie pueda ver ni cambiar datos que no le tocan."]
+  ], [10, 45, 45]));
   c.push(h2("2.3 Aplicabilidad empresarial"));
-  c.push(p("Aunque el caso de estudio es una institución educativa, el modelo corresponde al de una aplicación de gestión de tareas empresarial. La tabla 3 muestra la equivalencia de conceptos, lo que permite reutilizar la solución en un área de trabajo de cualquier empresa."));
-  c.push(tituloTabla("Equivalencia entre el dominio académico y el empresarial"));
-  c.push(tabla(["Campus+ (académico)", "Equivalente en una empresa", "Responsabilidad"], [
-    ["Profesor", "Jefe de área / líder de proyecto", "Crea, asigna, edita y elimina tareas; revisa el avance."],
-    ["Estudiante", "Colaborador / empleado", "Consulta sus tareas y actualiza su estado."],
-    ["Tutor", "Supervisor / recursos humanos", "Da seguimiento al desempeño de un grupo de personas (solo lectura)."],
-    ["Actividad", "Tarea / orden de trabajo", "Unidad de trabajo con fecha de entrega."],
-    ["Grupo completo", "Todo el equipo", "Tarea que cada integrante debe cumplir."],
-    ["Materia", "Proyecto / categoría", "Agrupa tareas relacionadas."]
-  ], [25, 32, 43]));
+  c.push(p("Aunque mi caso de estudio es una escuela, la app sirve igual para una empresa que reparte tareas: casi solo cambian los nombres."));
+  c.push(tituloTabla("Equivalencia entre el caso escolar y uno de empresa"));
+  c.push(tabla(["Campus+ (escuela)", "En una empresa", "Qué hace"], [
+    ["Profesor", "Jefe de área", "Registra y asigna tareas, y revisa el avance."],
+    ["Estudiante", "Colaborador", "Consulta sus tareas y actualiza cómo va."],
+    ["Tutor", "Supervisor", "Da seguimiento a un grupo de personas (solo consulta)."],
+    ["Actividad", "Tarea", "Un trabajo con fecha de entrega."]
+  ], [25, 27, 48]));
 
   // 3
-  c.push(h1("3. Partes interesadas y usuarios"));
+  c.push(h1("3. Usuarios"));
   c.push(tituloTabla("Perfiles de usuario"));
-  c.push(tabla(["Actor", "Descripción", "Necesidades principales", "Uso y dispositivo"], [
-    ["Estudiante", "Persona que ejecuta las actividades asignadas.", "Ver qué debe entregar y cuándo; marcar su avance; no ver datos de otros.", "Varias veces al día · teléfono"],
-    ["Profesor", "Persona que diseña y asigna actividades.", "Registrar rápido; asignar a una persona o al grupo; corregir y eliminar; ver el avance de cada estudiante.", "Diario · teléfono y tableta"],
-    ["Tutor", "Persona que supervisa a un grupo de estudiantes.", "Consultar a sus tutorados y el estado de sus actividades sin poder modificarlas.", "Semanal · tableta o teléfono"],
-    ["Administrador de TI", "Responsable técnico de la plataforma.", "Alta de usuarios y roles, respaldos, seguridad y despliegue.", "Ocasional · consola de Supabase y Vercel"],
-    ["Dirección / coordinación", "Patrocinador del proyecto.", "Adopción, confiabilidad y protección de datos personales.", "—"]
-  ], [15, 25, 38, 22]));
-  c.push(h2("3.1 Fuentes y técnicas de obtención"));
+  c.push(tabla(["Actor", "Qué necesita", "Cuándo y dónde la usa"], [
+    ["Estudiante", "Ver qué debe entregar y cuándo, y marcar su avance.", "Varias veces al día · teléfono"],
+    ["Profesor", "Registrar rápido, asignar a una persona o al grupo, corregir y ver cómo va cada quien.", "Diario · teléfono y tableta"],
+    ["Tutor", "Ver a sus tutorados y el estado de sus actividades, sin poder cambiarlas.", "Semanal · tableta o teléfono"]
+  ], [16, 58, 26]));
+  c.push(h2("3.1 De dónde salieron los requerimientos"));
   c.push(...vinetas([
-    "**Análisis de bocetos y prototipo del cliente:** bocetos en Figma y el prototipo navegable «Campus+ V1» (escritorio) y «V2 Móvil» con 12 pantallas.",
-    "**Escenarios de uso por rol:** recorridos paso a paso de cada actor para descubrir datos, reglas y casos alternos.",
-    "**Análisis del dominio de datos:** revisión de qué información maneja cada pantalla y qué reglas de acceso aplican.",
-    "**Análisis de brechas del prototipo:** se identificaron carencias del diseño original que se convirtieron en requerimientos (tabla 5)."
+    "**Bocetos y prototipo:** revisé los bocetos en Figma y el prototipo navegable con 12 pantallas.",
+    "**Recorrido por rol:** seguí paso a paso lo que haría cada usuario para ver qué datos y reglas hacían falta.",
+    "**Comparación con el prototipo:** encontré cosas que le faltaban y las convertí en requerimientos (tabla 5)."
   ]));
-  c.push(tituloTabla("Brechas detectadas en el prototipo y requerimiento que las resuelve"));
-  c.push(tabla(["Brecha del prototipo", "Consecuencia", "Requerimiento"], [
-    ["Un único estado por actividad, aun cuando es para todo el grupo.", "Si un estudiante marcaba «Terminada», cambiaba para todos.", "RF-09 y RN-07 (estado por asignación)."],
-    ["Sin inicio de sesión; cualquier persona elegía un perfil.", "Nula seguridad y sin identidad de usuario.", "RF-01, RNF-04."],
-    ["No existía forma de salir de un perfil.", "Usuario atrapado en el rol elegido.", "RF-02."],
-    ["Datos solo en memoria del navegador.", "Información perdida y no compartida entre dispositivos.", "RNF-05, RNF-06."],
-    ["Formulario sin validación.", "Actividades sin nombre o fecha.", "RN-01 a RN-04."],
-    ["El profesor no veía el avance individual.", "Sin visibilidad (OBJ-2).", "RF-12."]
-  ], [38, 34, 28]));
+  c.push(tituloTabla("Lo que le faltaba al prototipo"));
+  c.push(tabla(["Qué le faltaba", "Qué problema causaba", "Requerimiento"], [
+    ["Un solo estado por actividad, aunque fuera para todo el grupo.", "Si un estudiante ponía «Terminada», cambiaba para todos.", "RF-08, RN-06"],
+    ["No había inicio de sesión.", "No había seguridad ni forma de saber quién era quién.", "RF-01, RNF-04"],
+    ["Los datos solo vivían en el navegador.", "Se perdía la información entre dispositivos.", "RNF-05"],
+    ["El formulario no validaba nada.", "Se podían guardar actividades sin nombre o sin fecha.", "RN-01, RN-02"]
+  ], [36, 36, 28]));
 
   // 4
   c.push(h1("4. Requerimientos funcionales"));
-  c.push(p("Prioridad según MoSCoW. Todos los requerimientos «Must» y «Should» están implementados en V1; la columna «Evidencia» indica la prueba automatizada que los verifica (detalle en el documento «Resultados de las pruebas»)."));
+  c.push(p("Los prioricé con MoSCoW. Los «Must» y los «Should» ya están hechos en la V1."));
   c.push(tituloTabla("Requerimientos funcionales"));
-  c.push(tabla(["ID", "Requerimiento", "Rol", "Prioridad", "Evidencia"], [
-    ["RF-01", "Iniciar sesión con correo y contraseña; el sistema reconoce el rol del usuario y lo lleva a su pantalla de inicio.", "Todos", "Must", "UI «Inicio de sesión», db:verificar"],
-    ["RF-02", "Cerrar sesión desde cualquier pantalla.", "Todos", "Must", "UI «cerrar sesión regresa al inicio»"],
-    ["RF-03", "Restringir cada pantalla al rol correspondiente (rutas protegidas).", "Todos", "Must", "UI y E2E «rutas de otro rol»"],
-    ["RF-04", "Mostrar al estudiante sus 3 próximas actividades no terminadas, ordenadas por fecha y hora.", "Estudiante", "Must", "Unitaria «proximas», UI flujo estudiante"],
-    ["RF-05", "Mostrar al estudiante el conteo de actividades por estado.", "Estudiante", "Should", "E2E «el tablero se actualiza»"],
-    ["RF-06", "Listar las actividades del estudiante y filtrarlas por estado.", "Estudiante", "Must", "UI «filtra sus actividades»"],
-    ["RF-07", "Ver el detalle de una actividad: descripción, materia, fecha, hora y profesor.", "Estudiante", "Must", "UI flujo estudiante"],
-    ["RF-08", "Cambiar el estado de una actividad propia (Pendiente, En proceso, Terminada).", "Estudiante", "Must", "UI, E2E, integración Supabase"],
-    ["RF-09", "Registrar una actividad y asignarla a un estudiante o al grupo completo.", "Profesor", "Must", "UI, E2E, BD «guardar_actividad»"],
-    ["RF-10", "Editar una actividad propia conservando el avance de los estudiantes que siguen asignados.", "Profesor", "Must", "Repositorio «al editar conserva el avance»"],
-    ["RF-11", "Eliminar una actividad propia con confirmación previa.", "Profesor", "Must", "UI «cancelar el diálogo no elimina», E2E"],
-    ["RF-12", "Consultar el avance de cada estudiante en una actividad y el estado global.", "Profesor", "Should", "UI «avance de cada estudiante»"],
-    ["RF-13", "Listar y filtrar las actividades registradas por el profesor.", "Profesor", "Must", "UI flujo profesor"],
-    ["RF-14", "Listar los tutorados con matrícula y programa.", "Tutor", "Must", "UI flujo tutor, integración Supabase"],
-    ["RF-15", "Consultar las actividades y estados de un tutorado.", "Tutor", "Must", "E2E «detalle de un tutorado»"],
-    ["RF-16", "Instalar la aplicación en el dispositivo y abrir la interfaz sin conexión.", "Todos", "Should", "E2E «PWA», «sin conexión»"],
-    ["RF-17", "Modo demostración con datos de ejemplo, sin servidor, para capacitación.", "Todos", "Could", "UI «restablece los datos»"],
-    ["RF-18", "Notificar actividades próximas a vencer.", "Estudiante", "Won't (V2)", "—"]
-  ], [8, 46, 12, 11, 23], { tam: 17 }));
+  c.push(tabla(["ID", "Requerimiento", "Rol", "Prioridad"], [
+    ["RF-01", "Iniciar y cerrar sesión; la app reconoce el rol y lleva al usuario a su pantalla.", "Todos", "Must"],
+    ["RF-02", "Que cada pantalla sea solo para su rol.", "Todos", "Must"],
+    ["RF-03", "Mostrarle al estudiante sus 3 próximas actividades sin terminar, ordenadas por fecha.", "Estudiante", "Must"],
+    ["RF-04", "Mostrarle cuántas actividades tiene en cada estado.", "Estudiante", "Should"],
+    ["RF-05", "Listar sus actividades y poder filtrarlas por estado.", "Estudiante", "Must"],
+    ["RF-06", "Ver el detalle de una actividad: descripción, materia, fecha y profesor.", "Estudiante", "Must"],
+    ["RF-07", "Cambiar el estado de una actividad propia.", "Estudiante", "Must"],
+    ["RF-08", "Registrar una actividad y asignarla a un estudiante o al grupo completo.", "Profesor", "Must"],
+    ["RF-09", "Editar una actividad propia sin borrar el avance de los estudiantes.", "Profesor", "Must"],
+    ["RF-10", "Eliminar una actividad propia, pidiendo confirmación antes.", "Profesor", "Must"],
+    ["RF-11", "Ver cómo va cada estudiante en una actividad.", "Profesor", "Should"],
+    ["RF-12", "Listar y filtrar las actividades que registró.", "Profesor", "Must"],
+    ["RF-13", "Listar a sus tutorados y ver sus actividades.", "Tutor", "Must"],
+    ["RF-14", "Instalar la app en el dispositivo y abrirla sin internet.", "Todos", "Should"],
+    ["RF-15", "Avisar cuando una actividad esté por vencer.", "Estudiante", "Won't (V2)"]
+  ], [9, 57, 17, 17], { tam: 17 }));
 
   // 5
   c.push(h1("5. Requerimientos no funcionales"));
-  c.push(tituloTabla("Requerimientos no funcionales y criterio de verificación"));
-  c.push(tabla(["ID", "Atributo", "Requerimiento", "Métrica / verificación", "Resultado V1"], [
-    ["RNF-01", "Usabilidad móvil", "Diseño mobile-first; objetivos táctiles ≥ 44 px; sin desplazamiento horizontal.", "E2E en teléfono (Pixel 7) y tableta (iPad).", "Cumple"],
-    ["RNF-02", "Accesibilidad", "Cumplir WCAG 2.1 nivel AA (contraste, etiquetas, foco, roles ARIA).", "axe-core en 13 pantallas; Lighthouse.", "0 violaciones · 100/100"],
-    ["RNF-03", "Rendimiento", "Primera carga visible < 2.5 s en móvil; interacción fluida.", "Lighthouse móvil (LCP, TBT).", "LCP 1.8 s · 98/100"],
-    ["RNF-04", "Seguridad: autenticación", "Contraseñas cifradas (bcrypt) y sesión con JWT con expiración.", "Supabase Auth; pruebas de login.", "Cumple"],
-    ["RNF-05", "Seguridad: autorización", "Cada rol solo ve y modifica lo que le corresponde, aplicado en el servidor.", "RLS; 19 pruebas de BD + 23 verificaciones en la nube.", "Cumple"],
-    ["RNF-06", "Integridad de datos", "Validaciones en interfaz, dominio y base de datos; operaciones atómicas.", "CHECK, FK, ENUM, función transaccional.", "Cumple"],
-    ["RNF-07", "Auditoría", "Registrar quién crea, modifica o elimina información.", "Tabla bitácora con triggers.", "Cumple"],
-    ["RNF-08", "Disponibilidad", "Servicio en la nube con HTTPS; interfaz disponible sin conexión.", "Vercel + Supabase; service worker.", "Cumple"],
-    ["RNF-09", "Portabilidad", "Funcionar en Android, iOS, Windows y macOS desde el navegador.", "PWA estándar; manifiesto e íconos.", "Cumple"],
-    ["RNF-10", "Mantenibilidad", "Código tipado, en capas y con pruebas automatizadas; cobertura ≥ 80 %.", "TypeScript estricto; Vitest con cobertura.", "91.6 % de líneas"],
-    ["RNF-11", "Privacidad", "Datos mínimos necesarios; secretos fuera del repositorio.", "Revisión del esquema; prueba de secretos.", "Cumple"],
-    ["RNF-12", "Escalabilidad", "Soportar el crecimiento de usuarios sin rediseño.", "Índices en BD; servicios administrados.", "Cumple (diseño)"]
-  ], [9, 15, 32, 26, 18], { tam: 17 }));
+  c.push(tituloTabla("Requerimientos no funcionales"));
+  c.push(tabla(["ID", "Atributo", "Requerimiento", "Resultado V1"], [
+    ["RNF-01", "Uso en el teléfono", "Diseñar primero para el celular, con botones grandes y sin scroll horizontal.", "Cumple"],
+    ["RNF-02", "Accesibilidad", "Cumplir WCAG 2.1 nivel AA: contraste, etiquetas y foco visible.", "0 violaciones"],
+    ["RNF-03", "Rendimiento", "Que la primera pantalla se vea en menos de 2.5 s en móvil.", "1.8 s"],
+    ["RNF-04", "Autenticación", "Contraseñas cifradas y sesión con un token que expira.", "Cumple"],
+    ["RNF-05", "Permisos", "Que cada rol vea y cambie solo lo suyo, revisado en el servidor.", "Cumple"],
+    ["RNF-06", "Integridad", "Validar en la pantalla y en la base de datos; guardar todo junto o nada.", "Cumple"],
+    ["RNF-07", "Auditoría", "Guardar quién crea, cambia o borra información.", "Cumple"],
+    ["RNF-08", "Mantenibilidad", "Código tipado, separado en capas y con pruebas; cobertura ≥ 80 %.", "91.6 %"]
+  ], [10, 18, 54, 18], { tam: 17 }));
 
   // 6
   c.push(h1("6. Reglas de negocio"));
   c.push(tituloTabla("Reglas de negocio y dónde se aplican"));
   c.push(tabla(["ID", "Regla", "Se aplica en"], [
-    ["RN-01", "Toda actividad requiere un nombre de 1 a 120 caracteres (sin contar espacios al inicio o al final).", "Formulario · dominio · CHECK en BD"],
-    ["RN-02", "Toda actividad requiere una fecha de entrega válida; la hora es opcional (HH:MM).", "Formulario · dominio · tipo date/time"],
-    ["RN-03", "La descripción admite hasta 2000 caracteres y la materia hasta 80; si no se indica materia se usa «General».", "Dominio · CHECK en BD · función"],
-    ["RN-04", "El destinatario debe ser un estudiante existente o el grupo completo.", "Dominio · función guardar_actividad"],
-    ["RN-05", "Matriz de permisos: solo el profesor gestiona actividades (y solo las suyas); solo el estudiante cambia el estado de SUS asignaciones; el tutor solo consulta a SUS tutorados.", "Rutas · dominio · RLS y privilegios por columna"],
-    ["RN-06", "Las próximas actividades son las no terminadas, ordenadas por fecha y hora (sin hora al final del día); se muestran máximo 3.", "Dominio"],
-    ["RN-07", "Cada estudiante tiene su propio estado por actividad. El estado global para el profesor es: todas Terminada → Terminada; todas Pendiente → Pendiente; cualquier otro caso → En proceso.", "Modelo de datos · dominio"],
-    ["RN-08", "Al editar una actividad se conserva el avance de los estudiantes que siguen siendo destinatarios; los que dejan de serlo se eliminan.", "Función guardar_actividad · repositorio"],
-    ["RN-09", "Eliminar una actividad requiere confirmación explícita y elimina en cascada sus asignaciones.", "Interfaz · FK ON DELETE CASCADE"],
-    ["RN-10", "Ningún usuario puede cambiar su propio rol ni la autoría de una actividad.", "Sin políticas de edición de perfiles · privilegios por columna"]
+    ["RN-01", "Toda actividad necesita un nombre de 1 a 120 caracteres.", "Formulario y base de datos"],
+    ["RN-02", "Toda actividad necesita una fecha de entrega; la hora es opcional.", "Formulario y base de datos"],
+    ["RN-03", "El destinatario tiene que ser un estudiante que exista o el grupo completo.", "Reglas del negocio"],
+    ["RN-04", "Solo el profesor maneja actividades, y solo las suyas; solo el estudiante cambia el estado de las suyas; el tutor solo consulta.", "Rutas, reglas y base de datos"],
+    ["RN-05", "Las próximas actividades son las que no están terminadas, ordenadas por fecha; se muestran máximo 3.", "Reglas del negocio"],
+    ["RN-06", "Cada estudiante tiene su propio estado. El profesor ve el general: todas Terminada → Terminada; todas Pendiente → Pendiente; si no, En proceso.", "Modelo de datos"],
+    ["RN-07", "Al editar una actividad se conserva el avance de los estudiantes que siguen asignados.", "Base de datos"],
+    ["RN-08", "Para eliminar una actividad hay que confirmar, y se borran también sus asignaciones.", "Pantalla y base de datos"]
   ], [9, 63, 28]));
 
   // 7
   c.push(h1("7. Historias de usuario"));
-  c.push(p("Formato: «Como <rol> quiero <acción> para <beneficio>». La estimación usa puntos de historia (serie de Fibonacci) y los criterios de aceptación siguen el formato Dado / Cuando / Entonces."));
-  c.push(tituloTabla("Backlog de producto (V1)"));
-  c.push(tabla(["ID", "Historia", "Criterios de aceptación", "Pts", "RF"], [
-    ["HU-01", "Como usuario quiero iniciar sesión con mi correo para acceder a mis datos de forma segura.", "Dado un correo y contraseña válidos, cuando entro, entonces veo el inicio de mi rol. Con datos incorrectos veo «Correo o contraseña incorrectos» sin revelar cuál falló.", "3", "RF-01"],
-    ["HU-02", "Como usuario quiero cerrar sesión para proteger mi cuenta en dispositivos compartidos.", "Cuando toco «Cerrar sesión», entonces regreso al inicio y las rutas protegidas me redirigen.", "1", "RF-02, 03"],
-    ["HU-03", "Como estudiante quiero ver mis próximas actividades para saber qué entregar primero.", "Veo máximo 3 no terminadas, ordenadas por fecha; si no hay, veo un mensaje.", "2", "RF-04, 05"],
-    ["HU-04", "Como estudiante quiero filtrar mis actividades por estado para enfocarme.", "Al elegir un filtro solo veo actividades con ese estado.", "2", "RF-06"],
-    ["HU-05", "Como estudiante quiero cambiar el estado de una actividad para reportar mi avance.", "Al elegir un estado se guarda, veo un aviso y el tablero se actualiza; persiste al recargar.", "3", "RF-07, 08"],
-    ["HU-06", "Como profesor quiero registrar una actividad para un estudiante o para el grupo.", "Sin nombre o fecha veo errores; al guardar aparece en la lista y a cada destinatario como Pendiente.", "5", "RF-09"],
-    ["HU-07", "Como profesor quiero editar una actividad para corregir datos.", "El formulario se precarga; al guardar se actualiza sin perder el avance de los estudiantes.", "3", "RF-10"],
-    ["HU-08", "Como profesor quiero eliminar una actividad con confirmación para evitar errores.", "Aparece un diálogo; «Cancelar» no borra; «Eliminar» la quita de todos.", "2", "RF-11"],
-    ["HU-09", "Como profesor quiero ver el avance de cada estudiante para detectar rezagos.", "En el detalle veo el estado de cada destinatario y el avance «x/y terminadas».", "3", "RF-12, 13"],
-    ["HU-10", "Como tutor quiero ver a mis tutorados para darles seguimiento.", "Veo nombre, matrícula y programa solo de mis tutorados.", "2", "RF-14"],
-    ["HU-11", "Como tutor quiero ver las actividades de un tutorado para identificar atrasos.", "Veo sus actividades y estados, sin poder modificarlos.", "2", "RF-15"],
-    ["HU-12", "Como usuario quiero instalar la app en mi teléfono para abrirla como una aplicación nativa.", "El navegador ofrece instalar; la interfaz abre sin conexión.", "3", "RF-16"]
-  ], [8, 30, 46, 6, 10], { tam: 17 }));
+  c.push(p("Las escribí con el formato «Como <rol> quiero <acción> para <beneficio>» y estimé el esfuerzo con puntos (1, 2, 3, 5)."));
+  c.push(tituloTabla("Backlog de la V1"));
+  c.push(tabla(["ID", "Historia", "Criterio de aceptación", "Pts"], [
+    ["HU-01", "Como usuario quiero iniciar sesión para entrar a mis datos.", "Con el correo y la contraseña correctos entro a mi pantalla; si están mal, veo un mensaje.", "3"],
+    ["HU-02", "Como usuario quiero cerrar sesión para que nadie más entre.", "Al cerrar sesión regreso al inicio y ya no puedo entrar a las pantallas protegidas.", "1"],
+    ["HU-03", "Como estudiante quiero ver mis próximas actividades.", "Veo máximo 3 sin terminar, ordenadas por fecha.", "2"],
+    ["HU-04", "Como estudiante quiero filtrar mis actividades por estado.", "Al elegir un filtro solo veo las de ese estado.", "2"],
+    ["HU-05", "Como estudiante quiero cambiar el estado de una actividad.", "Se guarda, veo un aviso y sigue igual si recargo la página.", "3"],
+    ["HU-06", "Como profesor quiero registrar una actividad para uno o para el grupo.", "Si falta el nombre o la fecha veo los errores; al guardar le aparece al estudiante como Pendiente.", "5"],
+    ["HU-07", "Como profesor quiero editar una actividad.", "El formulario aparece lleno y al guardar no se pierde el avance.", "3"],
+    ["HU-08", "Como profesor quiero que me pida confirmación al eliminar.", "Sale un cuadro; «Cancelar» no borra.", "2"],
+    ["HU-09", "Como profesor quiero ver cómo va cada estudiante.", "En el detalle veo el estado de cada uno y el avance «x/y terminadas».", "3"],
+    ["HU-10", "Como tutor quiero ver a mis tutorados y sus actividades.", "Veo solo a los míos y no puedo cambiar sus estados.", "3"]
+  ], [8, 34, 50, 8], { tam: 17 }));
 
   // 8
   c.push(h1("8. Casos de uso"));
-  c.push(...(await figura("diagramas/casos-de-uso.png", "Diagrama de casos de uso de Campus+.", 600)));
-  c.push(h2("8.1 CU-05 Cambiar estado de actividad"));
+  c.push(...(await figura("diagramas/casos-de-uso.png", "Diagrama de casos de uso.", 560)));
+  c.push(h2("8.1 Registrar actividad (profesor)"));
   c.push(tabla(["Elemento", "Descripción"], [
-    ["Actor", "Estudiante"],
-    ["Precondición", "Sesión iniciada como estudiante; la actividad está asignada a él."],
-    ["Flujo principal", "1. Abre «Mis actividades» o una próxima actividad. 2. Ve el detalle. 3. Elige un estado. 4. El sistema guarda el cambio solo en su asignación. 5. Muestra «Estado cambiado a …» y actualiza el tablero."],
-    ["Flujos alternos", "3a. Elige el estado actual: no se realiza ninguna operación. 4a. Sin conexión o error: se muestra un aviso y el estado no cambia."],
-    ["Poscondición", "La asignación queda con el nuevo estado y se registra en la bitácora."],
-    ["Reglas", "RN-05, RN-07"]
+    ["Precondición", "Tiene sesión como profesor."],
+    ["Flujo principal", "1. Toca «Registra actividad». 2. Escribe nombre, fecha, materia y a quién se la deja. 3. Toca «Guardar». 4. La app valida. 5. Guarda la actividad y sus asignaciones. 6. Muestra «Actividad registrada»."],
+    ["Flujos alternos", "4a. Si hay datos mal, se marcan los campos y no se guarda. 5a. Si el servidor la rechaza, no se guarda nada y sale el motivo."],
+    ["Poscondición", "La actividad le aparece a cada destinatario como Pendiente."]
   ], [22, 78]));
-  c.push(h2("8.2 CU-06 Registrar actividad"));
+  c.push(h2("8.2 Cambiar estado (estudiante)"));
   c.push(tabla(["Elemento", "Descripción"], [
-    ["Actor", "Profesor"],
-    ["Precondición", "Sesión iniciada como profesor."],
-    ["Flujo principal", "1. Toca «+» o «Registra actividad». 2. Captura nombre, fecha, hora, materia, descripción y destinatario. 3. Toca «Guardar». 4. El sistema valida (RN-01 a RN-04). 5. Crea la actividad y sus asignaciones en una sola transacción. 6. Muestra «Actividad registrada» y la lista actualizada."],
-    ["Flujos alternos", "4a. Datos inválidos: se marcan los campos con mensajes y no se guarda. 5a. Rechazo del servidor (permiso o restricción): se revierte la transacción y se muestra el motivo."],
-    ["Poscondición", "La actividad aparece a cada destinatario como Pendiente; queda registrada en la bitácora."],
-    ["Reglas", "RN-01 a RN-05"]
-  ], [22, 78]));
-  c.push(h2("8.3 CU-08 Eliminar actividad"));
-  c.push(tabla(["Elemento", "Descripción"], [
-    ["Actor", "Profesor"],
-    ["Precondición", "La actividad fue registrada por el mismo profesor."],
-    ["Flujo principal", "1. Toca «Eliminar» en la tarjeta o en el detalle. 2. El sistema muestra un diálogo con el nombre de la actividad. 3. Confirma. 4. Se eliminan la actividad y sus asignaciones. 5. Se muestra «Actividad eliminada»."],
-    ["Flujos alternos", "3a. Cancela o presiona Esc: el diálogo se cierra sin cambios."],
-    ["Poscondición", "La actividad deja de aparecer para todos los roles; la bitácora conserva el registro de la eliminación."],
-    ["Reglas", "RN-05, RN-09"]
+    ["Precondición", "Tiene sesión como estudiante y la actividad está asignada a él."],
+    ["Flujo principal", "1. Abre el detalle de la actividad. 2. Elige un estado. 3. La app guarda el cambio solo en su asignación. 4. Muestra el aviso y actualiza el tablero."],
+    ["Flujos alternos", "2a. Elige el estado que ya tenía: no se hace nada. 3a. Sin internet: sale un aviso y el estado no cambia."],
+    ["Poscondición", "La asignación queda con el nuevo estado."]
   ], [22, 78]));
 
   // 9
   c.push(h1("9. Restricciones y supuestos"));
   c.push(h2("9.1 Restricciones"));
   c.push(...vinetas([
-    "Presupuesto cero para infraestructura en V1: se usan los planes gratuitos de Vercel (hospedaje) y Supabase (base de datos y autenticación).",
-    "Uso principal en teléfonos y tabletas; debe funcionar en los navegadores actuales sin instalar software adicional.",
-    "Las cuentas y los roles los da de alta el administrador; la aplicación no permite autorregistro (evita que alguien se asigne un rol).",
-    "La V1 se entrega como base para mejoras posteriores: el diseño debe facilitar el crecimiento."
+    "No hay presupuesto: uso los planes gratuitos de Vercel y Supabase.",
+    "Se usa sobre todo en teléfono y tableta, sin instalar nada extra.",
+    "Las cuentas y los roles los da de alta el administrador; la app no deja registrarse solo."
   ]));
   c.push(h2("9.2 Supuestos"));
   c.push(...vinetas([
-    "Cada estudiante tiene como máximo un tutor asignado.",
-    "Una actividad para el grupo se asigna a los estudiantes registrados al momento de crearla o editarla.",
-    "Los usuarios cuentan con conexión a Internet para consultar y modificar datos; sin conexión solo se abre la interfaz.",
-    "La zona horaria de las fechas de entrega es la de la organización (se guardan como fecha y hora locales)."
+    "Cada estudiante tiene como máximo un tutor.",
+    "Una actividad para el grupo se les deja a los estudiantes registrados en ese momento.",
+    "Los usuarios tienen internet para consultar y cambiar datos."
   ]));
 
   // 10
   c.push(h1("10. Matriz de trazabilidad"));
-  c.push(p("Relaciona cada requerimiento con su historia, caso de uso, pantalla y evidencia de prueba. Permite comprobar que nada quedó sin implementar ni sin probar."));
-  c.push(tituloTabla("Trazabilidad requerimiento → implementación → prueba"));
-  c.push(tabla(["RF", "HU", "CU", "Pantalla(s)", "Código principal", "Prueba"], [
-    ["RF-01", "HU-01", "CU-01", "01 Inicio", "screens/Home.tsx · SupabaseRepo.iniciarSesion", "tests/ui «Inicio de sesión»"],
-    ["RF-02/03", "HU-02", "CU-01", "Todas", "components/Shell.tsx", "tests/ui y e2e «rutas»"],
-    ["RF-04/05", "HU-03", "CU-02", "02", "domain/reglas.proximas", "tests/unit/reglas"],
-    ["RF-06", "HU-04", "CU-03", "03", "screens/Estudiante.MisActividades", "tests/ui «filtra»"],
-    ["RF-07/08", "HU-05", "CU-04/05", "04", "repo.cambiarEstado · RLS asignaciones_estado", "e2e · db/seguridad"],
-    ["RF-09", "HU-06", "CU-06", "07", "FormActividad · guardar_actividad()", "e2e · db · integración"],
-    ["RF-10", "HU-07", "CU-07", "08", "guardar_actividad() (edición)", "unit/memoriaRepo · integración"],
-    ["RF-11", "HU-08", "CU-08", "09", "useEliminar · actividades_baja", "tests/ui · e2e"],
-    ["RF-12/13", "HU-09", "CU-09", "06 · Detalle", "reglas.estadoGlobal/avance", "tests/ui «avance»"],
-    ["RF-14/15", "HU-10/11", "CU-10/11", "10 · 11 · 12", "screens/Tutor · es_mi_tutorado()", "e2e · db/seguridad"],
-    ["RF-16", "HU-12", "—", "Todas", "vite-plugin-pwa · usePwaInstall", "e2e «PWA»"]
-  ], [11, 10, 10, 14, 33, 22], { tam: 16 }));
+  c.push(p("Esta tabla conecta cada requerimiento con su historia, su pantalla y su prueba. Me sirvió para revisar que no se me quedara nada sin hacer ni sin probar."));
+  c.push(tituloTabla("Trazabilidad requerimiento → pantalla → prueba"));
+  c.push(tabla(["RF", "HU", "Pantalla", "Prueba"], [
+    ["RF-01, RF-02", "HU-01, HU-02", "Inicio de sesión · todas", "Pruebas de interfaz y E2E de rutas"],
+    ["RF-03, RF-04", "HU-03", "Inicio del estudiante", "Prueba unitaria de «próximas»"],
+    ["RF-05", "HU-04", "Mis actividades", "Prueba de interfaz del filtro"],
+    ["RF-06, RF-07", "HU-05", "Detalle de actividad", "E2E y pruebas de base de datos"],
+    ["RF-08", "HU-06", "Registrar actividad", "E2E, base de datos e integración"],
+    ["RF-09", "HU-07", "Editar actividad", "Prueba del repositorio"],
+    ["RF-10", "HU-08", "Confirmar eliminación", "Prueba de interfaz y E2E"],
+    ["RF-11, RF-12", "HU-09", "Actividades del profesor", "Prueba de interfaz del avance"],
+    ["RF-13", "HU-10", "Tutorados", "E2E y pruebas de permisos"]
+  ], [17, 17, 28, 38], { tam: 17 }));
 
   // 11
-  c.push(h1("11. Trabajo futuro (backlog V2)"));
-  c.push(tituloTabla("Mejoras priorizadas para versiones posteriores"));
-  c.push(tabla(["Prioridad", "Mejora", "Valor para el negocio"], [
-    ["Alta", "Notificaciones push de actividades próximas a vencer.", "Reduce entregas tardías."],
-    ["Alta", "Panel de administración para dar de alta usuarios, roles y tutores.", "Elimina la dependencia de la consola técnica."],
-    ["Media", "Entrega de evidencias (archivos) por actividad.", "Centraliza también el resultado del trabajo."],
-    ["Media", "Grupos o materias como entidad, para asignar por grupo y no a todos los estudiantes.", "Escala a varias áreas o equipos."],
-    ["Media", "Reportes exportables (PDF/Excel) de avance por grupo.", "Apoya la toma de decisiones de la coordinación."],
-    ["Baja", "Comentarios entre profesor y estudiante por actividad.", "Mejora la comunicación."]
+  c.push(h1("11. Trabajo futuro"));
+  c.push(tituloTabla("Mejoras que dejo anotadas para más adelante"));
+  c.push(tabla(["Prioridad", "Mejora", "Por qué serviría"], [
+    ["Alta", "Avisos en el teléfono cuando una actividad esté por vencer.", "Habría menos entregas tarde."],
+    ["Alta", "Una pantalla para dar de alta usuarios y roles.", "Ya no habría que entrar a la consola técnica."],
+    ["Media", "Subir archivos de entrega en cada actividad.", "Se tendría también el resultado del trabajo."],
+    ["Media", "Reportes de avance que se puedan exportar.", "Ayudaría a revisar cómo va el grupo."]
   ], [14, 52, 34]));
-  c.push(...nota("Los requerimientos Must y Should de V1 están implementados y verificados con pruebas automatizadas. La matriz de trazabilidad de la sección 10 enlaza cada uno con su código y su evidencia.", "Conclusión"));
+  c.push(...nota("Los requerimientos Must y Should de la V1 están hechos y probados. La tabla de la sección 10 enlaza cada uno con su pantalla y su prueba.", "Conclusión"));
 
   await guardar("01-Analisis-de-requerimientos.docx", {
     titulo: "Análisis de requerimientos",
-    subtitulo: "Necesidades de los usuarios, requisitos del negocio y especificación de V1",
-    descripcion: "Define el problema, los objetivos del negocio, los usuarios, los requerimientos funcionales y no funcionales, las reglas de negocio, las historias de usuario, los casos de uso y la trazabilidad hasta las pruebas."
+    subtitulo: "Qué necesitan los usuarios y qué debe hacer la V1",
+    descripcion: "Aquí explico el problema, los objetivos, quiénes usan la app, los requerimientos, las reglas de negocio, las historias de usuario y los casos de uso."
   }, c);
 }

@@ -18,3 +18,7 @@ coverage
 # Documentos generados (se entregan aparte)
 docs/entregables
 Entrega-Fase1
+
+# Intermedios regenerables
+docs/img/diagramas/*.svg
+.claude

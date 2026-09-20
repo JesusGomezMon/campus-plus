@@ -3,7 +3,7 @@ import type { Actividad, Estado } from "./domain/tipos";
 const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
 
 /** 2026-09-19 → "19 - 09 - 26" */
-export function fechaCorta(iso: string): string {
+function fechaCorta(iso: string): string {
   if (!iso) return "—";
   const [y, m, d] = iso.split("-");
   return `${d} - ${m} - ${y.slice(2)}`;

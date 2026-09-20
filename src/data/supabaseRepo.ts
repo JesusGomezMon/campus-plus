@@ -46,7 +46,7 @@ function aEstudiante(f: FilaPerfil): Estudiante {
 }
 
 /** Traduce errores de PostgREST/PostgreSQL a mensajes comprensibles para el usuario. */
-export function traducirError(e: PostgrestError | Error | null): ErrorDominio {
+function traducirError(e: PostgrestError | Error | null): ErrorDominio {
   if (!e) return new ErrorDominio("Error desconocido.");
   const codigo = "code" in e ? e.code : "";
   if (codigo === "42501" || codigo === "PGRST301") return new ErrorDominio("No tienes permiso para realizar esta acción.", "permiso");

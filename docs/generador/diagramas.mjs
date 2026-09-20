@@ -9,12 +9,12 @@ const F = "Arial, Helvetica, sans-serif";
 
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-function texto(x, y, s, { size = 14, peso = 400, color = C.tinta, anchor = "middle", italic = false } = {}) {
+function texto(x, y, s, { size = 15, peso = 400, color = C.tinta, anchor = "middle", italic = false } = {}) {
   return `<text x="${x}" y="${y}" font-family="${F}" font-size="${size}" font-weight="${peso}" fill="${color}" text-anchor="${anchor}"${italic ? ' font-style="italic"' : ""}>${esc(s)}</text>`;
 }
 
 /** Caja con título y líneas opcionales. */
-function caja(x, y, w, h, titulo, lineas = [], { fill = C.blanco, stroke = C.verde, tc = C.tinta, r = 10, size = 15, ls = 12.5, align = "middle", dash = false } = {}) {
+function caja(x, y, w, h, titulo, lineas = [], { fill = C.blanco, stroke = C.verde, tc = C.tinta, r = 10, size = 16, ls = 13.5, align = "middle", dash = false } = {}) {
   const tx = align === "middle" ? x + w / 2 : x + 14;
   let s = `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="${fill}" stroke="${stroke}" stroke-width="1.6"${dash ? ' stroke-dasharray="6 4"' : ""}/>`;
   const alto = size + 6 + lineas.length * (ls + 5);
@@ -30,8 +30,8 @@ function caja(x, y, w, h, titulo, lineas = [], { fill = C.blanco, stroke = C.ver
   return s;
 }
 
-function flecha(x1, y1, x2, y2, { label = "", color = C.linea, dash = false, doble = false, lx, ly, lsize = 12 } = {}) {
-  let s = `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="1.8" marker-end="url(#fl)"${doble ? ' marker-start="url(#fli)"' : ""}${dash ? ' stroke-dasharray="6 4"' : ""}/>`;
+function flecha(x1, y1, x2, y2, { label = "", color = C.linea, dash = false, lx, ly, lsize = 13 } = {}) {
+  let s = `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="1.8" marker-end="url(#fl)"${dash ? ' stroke-dasharray="6 4"' : ""}/>`;
   if (label) {
     const mx = lx ?? (x1 + x2) / 2, my = ly ?? (y1 + y2) / 2 - 6;
     const w = label.length * lsize * 0.56 + 10;
@@ -49,10 +49,9 @@ function svg(w, h, cuerpo, titulo) {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
   <defs>
     <marker id="fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="${C.linea}"/></marker>
-    <marker id="fli" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="${C.linea}"/></marker>
   </defs>
   <rect width="100%" height="100%" fill="#FFFFFF"/>
-  ${titulo ? texto(w / 2, 34, titulo, { size: 20, peso: 700, color: C.verdeO }) : ""}
+  ${titulo ? texto(w / 2, 34, titulo, { size: 21, peso: 700, color: C.verdeO }) : ""}
   ${cuerpo}
 </svg>`;
 }
@@ -62,264 +61,217 @@ function actor(x, y, nombre, color = C.verdeO) {
     <circle cx="${x}" cy="${y}" r="13"/><line x1="${x}" y1="${y + 13}" x2="${x}" y2="${y + 48}"/>
     <line x1="${x - 22}" y1="${y + 26}" x2="${x + 22}" y2="${y + 26}"/>
     <line x1="${x}" y1="${y + 48}" x2="${x - 18}" y2="${y + 76}"/><line x1="${x}" y1="${y + 48}" x2="${x + 18}" y2="${y + 76}"/></g>
-    ${texto(x, y + 98, nombre, { size: 15, peso: 700, color })}`;
+    ${texto(x, y + 98, nombre, { size: 16, peso: 700, color })}`;
 }
 
-function uc(cx, cy, t, w = 230) {
-  return `<ellipse cx="${cx}" cy="${cy}" rx="${w / 2}" ry="24" fill="${C.verdeC}" stroke="${C.verde}" stroke-width="1.5"/>${texto(cx, cy + 5, t, { size: 13 })}`;
+function uc(cx, cy, t, w = 300) {
+  return `<ellipse cx="${cx}" cy="${cy}" rx="${w / 2}" ry="25" fill="${C.verdeC}" stroke="${C.verde}" stroke-width="1.5"/>${texto(cx, cy + 5, t, { size: 15 })}`;
 }
 
 const diagramas = {};
 
 // 1. Casos de uso
 {
-  let b = `<rect x="200" y="60" width="700" height="630" rx="14" fill="none" stroke="${C.verdeO}" stroke-width="1.6"/>`;
-  b += texto(550, 88, "Sistema Campus+", { size: 16, peso: 700, color: C.verdeO });
-  const est = [["CU-01 Iniciar / cerrar sesión", 130], ["CU-02 Consultar próximas actividades", 190], ["CU-03 Consultar y filtrar mis actividades", 250], ["CU-04 Ver detalle de actividad", 310], ["CU-05 Cambiar estado de actividad", 370]];
-  const prof = [["CU-06 Registrar actividad", 450], ["CU-07 Editar actividad", 510], ["CU-08 Eliminar actividad", 570], ["CU-09 Consultar avance por estudiante", 630]];
-  const tut = [["CU-10 Consultar tutorados", 470], ["CU-11 Consultar actividades del tutorado", 560]];
-  for (const [t, y] of est) b += uc(400, y, t, 290);
-  for (const [t, y] of prof) b += uc(400, y, t, 290);
-  for (const [t, y] of tut) b += uc(725, y, t, 300);
-  b += actor(90, 210, "Estudiante");
-  b += actor(90, 520, "Profesor");
-  b += actor(1000, 480, "Tutor");
-  for (const [, y] of est) b += `<line x1="112" y1="240" x2="255" y2="${y}" stroke="${C.linea}" stroke-width="1.3"/>`;
-  for (const [, y] of prof) b += `<line x1="112" y1="550" x2="255" y2="${y}" stroke="${C.linea}" stroke-width="1.3"/>`;
-  b += `<path d="M108 530 C 170 420, 200 160, 255 135" fill="none" stroke="${C.linea}" stroke-width="1.3" stroke-dasharray="4 4"/>`;
-  for (const [, y] of tut) b += `<line x1="978" y1="510" x2="875" y2="${y}" stroke="${C.linea}" stroke-width="1.3"/>`;
-  b += `<path d="M1000 470 C 990 250, 760 140, 545 130" fill="none" stroke="${C.linea}" stroke-width="1.3" stroke-dasharray="4 4"/>`;
-  b += texto(550, 720, "Todos los actores usan CU-01 (línea punteada). La autorización de cada caso se valida en el dominio y en la base de datos (RLS).", { size: 12.5, color: C.gris });
-  diagramas["casos-de-uso"] = svg(1100, 740, b, "Diagrama de casos de uso");
+  let b = `<rect x="250" y="70" width="400" height="480" rx="14" fill="none" stroke="${C.verdeO}" stroke-width="1.6"/>`;
+  b += texto(450, 98, "Campus+", { size: 17, peso: 700, color: C.verdeO });
+  const usos = [
+    [130, "Iniciar y cerrar sesión"],
+    [195, "Ver mis actividades"],
+    [260, "Cambiar el estado"],
+    [325, "Registrar actividad"],
+    [390, "Editar o eliminar"],
+    [455, "Ver el avance del grupo"],
+    [520, "Ver a mis tutorados"]
+  ];
+  for (const [y, t] of usos) b += uc(450, y, t, 340);
+
+  b += actor(110, 165, "Estudiante");
+  b += actor(110, 370, "Profesor");
+  b += actor(790, 390, "Tutor");
+
+  const linea = (x1, y1, x2, y2, dash = false) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${C.linea}" stroke-width="1.3"${dash ? ' stroke-dasharray="4 4"' : ""}/>`;
+  b += linea(132, 191, 280, 195);
+  b += linea(132, 191, 280, 260);
+  b += linea(132, 191, 280, 140, true);
+  b += linea(132, 396, 280, 325);
+  b += linea(132, 396, 280, 390);
+  b += linea(132, 396, 280, 455);
+  b += linea(132, 396, 285, 152, true);
+  b += linea(768, 416, 620, 520);
+  b += linea(768, 416, 618, 145, true);
+  b += texto(450, 585, "La línea punteada es «iniciar sesión»: la usan los tres.", { size: 14, color: C.gris });
+  diagramas["casos-de-uso"] = svg(900, 610, b, "Casos de uso");
 }
 
-// 2. Arquitectura del sistema (despliegue)
+// 2. Arquitectura del sistema
 {
   let b = "";
-  b += caja(40, 90, 250, 400, "", [], { fill: C.verdeC, stroke: C.verde, r: 16 });
-  b += texto(165, 120, "Dispositivo del usuario", { size: 15, peso: 700, color: C.verdeO });
-  b += texto(165, 140, "Teléfono / tablet / navegador", { size: 12, color: C.gris });
-  b += caja(65, 160, 200, 120, "PWA Campus+", ["React 19 + TypeScript", "Enrutador y pantallas", "Reglas de dominio"]);
-  b += caja(65, 340, 200, 120, "Service Worker", ["Workbox: caché de la", "aplicación (sin conexión)", "e instalación"], { stroke: C.oro });
-
-  b += caja(410, 320, 230, 140, "Vercel (CDN)", ["Hospeda los archivos", "estáticos compilados", "HTTPS, CSP, HSTS", "Reescritura de rutas SPA"], { stroke: C.azul, fill: C.azulC });
-  b += caja(410, 540, 230, 130, "GitHub", ["Repositorio y ramas", "GitHub Actions (CI):", "auditoría, compilación", "y 108 pruebas"], { stroke: C.gris });
-
-  b += caja(750, 90, 300, 420, "", [], { fill: "#F4F7F4", stroke: C.verdeO, r: 16 });
-  b += texto(900, 120, "Supabase (nube)", { size: 15, peso: 700, color: C.verdeO });
-  b += caja(775, 140, 250, 80, "Auth (GoTrue)", ["Correo + contraseña, JWT"]);
-  b += caja(775, 235, 250, 80, "API REST (PostgREST)", ["Consultas y RPC con el JWT"]);
-  b += caja(775, 330, 250, 160, "PostgreSQL 15", ["Tablas: profiles, actividades,", "asignaciones, bitacora", "RLS por rol + privilegios", "Función guardar_actividad", "Triggers de auditoría"], { stroke: C.verdeO });
-  b += flecha(900, 220, 900, 235);
-  b += flecha(900, 315, 900, 330);
-
-  b += flecha(265, 190, 775, 180, { label: "HTTPS: inicio de sesión (correo + contraseña → JWT)", lx: 520, ly: 175 });
-  b += flecha(265, 250, 775, 275, { label: "HTTPS + JWT: consultas y cambios", lx: 520, ly: 255 });
-  b += flecha(410, 390, 265, 390, { label: "descarga la app", lx: 338, ly: 378 });
-  b += flecha(525, 540, 525, 460, { label: "despliegue automático", lx: 525, ly: 505 });
-  b += texto(545, 710, "Cliente ligero (SPA/PWA) + Backend como Servicio (BaaS): la lógica de negocio se valida en el cliente", { size: 12.5, color: C.gris });
-  b += texto(545, 730, "y se hace cumplir en el servidor mediante RLS, restricciones y funciones de PostgreSQL.", { size: 12.5, color: C.gris });
-  diagramas["arquitectura-sistema"] = svg(1090, 750, b, "Arquitectura del sistema (cliente–servidor en la nube)");
+  b += caja(320, 70, 260, 80, "Vercel", ["Aquí se publica la app"], { stroke: C.azul, fill: C.azulC });
+  b += caja(60, 240, 260, 120, "Teléfono o tableta", ["La app Campus+", "(React, se puede instalar)"]);
+  b += caja(580, 230, 280, 140, "Supabase (nube)", ["Inicio de sesión", "Base de datos PostgreSQL", "con las reglas de permisos"], { stroke: C.verdeO, fill: C.verdeC });
+  b += flecha(400, 150, 210, 240, { label: "descarga la app", lx: 250, ly: 190 });
+  b += flecha(320, 300, 580, 300, { label: "pide y guarda datos (HTTPS)", lx: 450, ly: 288 });
+  b += texto(450, 420, "La app revisa los datos antes de mandarlos y la base de datos vuelve a revisar", { size: 14, color: C.gris });
+  b += texto(450, 442, "que la persona tenga permiso, por si alguien intenta entrar por otro lado.", { size: 14, color: C.gris });
+  diagramas["arquitectura-sistema"] = svg(900, 470, b, "Cómo se conectan las partes");
 }
 
 // 3. Arquitectura por capas
 {
   let b = "";
-  const X = 170, W = 560;
+  const X = 210, W = 380;
   const capas = [
-    ["Presentación", "src/screens, src/components", "Pantallas por rol, formularios, diálogos, estados de carga/error", C.verdeC, C.verde],
-    ["Aplicación", "src/app (contexto, rutas)", "Sesión, rutas protegidas por rol, useConsulta / mutar, avisos", C.verdeC, C.verde],
-    ["Dominio", "src/domain (tipos, reglas)", "Entidades, validación RN-01…RN-07, matriz de permisos (sin dependencias)", C.oroC, C.oro],
-    ["Puerto de datos", "src/data/repositorio.ts", "Interfaz Repositorio: contrato único para leer y escribir", C.azulC, C.azul]
+    ["Pantallas", "Lo que ve y toca el usuario", C.verdeC, C.verde],
+    ["Reglas del negocio", "Validaciones y permisos por rol", C.oroC, C.oro],
+    ["Repositorio", "Contrato para leer y guardar datos", C.azulC, C.azul]
   ];
-  capas.forEach(([t, ruta, desc, fill, stroke], i) => {
-    const y = 70 + i * 105;
-    b += caja(X, y, W, 80, `${t}  ·  ${ruta}`, [desc], { fill, stroke });
-    if (i < capas.length - 1) b += flecha(X + W / 2, y + 80, X + W / 2, y + 105);
+  capas.forEach(([t, desc, fill, stroke], i) => {
+    const y = 75 + i * 110;
+    b += caja(X, y, W, 80, t, [desc], { fill, stroke });
+    if (i < capas.length - 1) b += flecha(X + W / 2, y + 80, X + W / 2, y + 110);
   });
-  b += caja(X, 510, 270, 90, "SupabaseRepo", ["Producción: PostgreSQL + Auth", "Traduce errores a mensajes"], { stroke: C.verdeO });
-  b += caja(X + 290, 510, 270, 90, "MemoriaRepo", ["Modo demostración / pruebas", "Mismas reglas de permisos"], { stroke: C.gris, dash: true });
-  b += flecha(X + 200, 465, X + 135, 510);
-  b += flecha(X + 360, 465, X + 425, 510);
-  b += texto(X + 280, 495, "implementan", { size: 12, color: C.gris });
-  b += texto(450, 640, "Patrones: arquitectura en capas, Repositorio (puertos y adaptadores), inyección de dependencias por contexto.", { size: 12.5, color: C.gris });
-  diagramas["arquitectura-capas"] = svg(900, 665, b, "Arquitectura lógica por capas");
+  b += caja(120, 410, 250, 80, "SupabaseRepo", ["La base de datos real"], { stroke: C.verdeO });
+  b += caja(430, 410, 250, 80, "MemoriaRepo", ["Datos de ejemplo"], { stroke: C.gris, dash: true });
+  b += camino("M400 375 C 400 395, 320 392, 245 406");
+  b += camino("M400 375 C 400 395, 480 392, 555 406");
+  b += texto(400, 535, "Cada capa solo usa la de abajo. Los dos de hasta abajo son intercambiables:", { size: 14, color: C.gris });
+  b += texto(400, 557, "uno guarda en la nube y el otro en el navegador, pero se usan igual.", { size: 14, color: C.gris });
+  diagramas["arquitectura-capas"] = svg(800, 585, b, "La aplicación por capas");
 }
 
 // 4. Modelo entidad-relación
 {
-  function tabla(x, y, w, nombre, filas, color = C.verde) {
-    const h = 34 + filas.length * 24 + 8;
+  function tablaEr(x, y, w, nombre, filas, color = C.verde) {
+    const h = 36 + filas.length * 26 + 8;
     let s = `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8" fill="#fff" stroke="${color}" stroke-width="1.6"/>`;
-    s += `<rect x="${x}" y="${y}" width="${w}" height="34" rx="8" fill="${color}"/><rect x="${x}" y="${y + 20}" width="${w}" height="14" fill="${color}"/>`;
-    s += texto(x + w / 2, y + 23, nombre, { size: 15, peso: 700, color: "#fff" });
-    filas.forEach(([k, n, t], i) => {
-      const fy = y + 56 + i * 24;
-      s += texto(x + 12, fy, k, { size: 11, peso: 700, color: k === "PK" ? C.oro : C.azul, anchor: "start" });
-      s += texto(x + 44, fy, n, { size: 13, color: C.tinta, anchor: "start" });
-      s += texto(x + w - 12, fy, t, { size: 11.5, color: C.gris, anchor: "end" });
+    s += `<rect x="${x}" y="${y}" width="${w}" height="36" rx="8" fill="${color}"/><rect x="${x}" y="${y + 22}" width="${w}" height="14" fill="${color}"/>`;
+    s += texto(x + w / 2, y + 25, nombre, { size: 16, peso: 700, color: "#fff" });
+    filas.forEach(([k, n], i) => {
+      const fy = y + 60 + i * 26;
+      s += texto(x + 12, fy, k, { size: 12, peso: 700, color: k === "PK" ? C.oro : C.azul, anchor: "start" });
+      s += texto(x + 48, fy, n, { size: 14.5, color: C.tinta, anchor: "start" });
     });
     return s;
   }
   let b = "";
-  b += tabla(40, 80, 250, "auth.users", [["PK", "id", "uuid"], ["", "email", "text"], ["", "encrypted_password", "bcrypt"]], C.gris);
-  b += tabla(40, 250, 300, "profiles", [["PK", "id", "uuid → auth.users"], ["", "nombre", "text(2..120)"], ["", "rol", "enum rol"], ["", "matricula", "text único"], ["", "programa", "text"], ["FK", "tutor_id", "uuid → profiles"], ["", "created_at", "timestamptz"]]);
-  b += tabla(440, 80, 310, "actividades", [["PK", "id", "bigint identity"], ["", "titulo", "text(1..120)"], ["", "descripcion", "text(≤2000)"], ["", "materia", "text(1..80)"], ["", "fecha", "date"], ["", "hora", "time"], ["", "para_grupo", "boolean"], ["FK", "profesor_id", "uuid → profiles"], ["", "created_at / updated_at", "timestamptz"]]);
-  b += tabla(440, 400, 310, "asignaciones", [["PK", "actividad_id", "bigint → actividades"], ["PK", "estudiante_id", "uuid → profiles"], ["", "estado", "enum estado"], ["", "actualizado", "timestamptz"]]);
-  b += tabla(820, 80, 250, "bitacora", [["PK", "id", "bigint identity"], ["", "tabla / operacion", "text"], ["", "registro", "text"], ["", "usuario_id", "uuid"], ["", "fecha", "timestamptz"], ["", "antes / despues", "jsonb"]], C.oro);
+  b += tablaEr(50, 90, 250, "profiles (usuarios)", [["PK", "id"], ["", "nombre"], ["", "rol"], ["", "matricula"], ["FK", "tutor_id"]]);
+  b += tablaEr(420, 90, 250, "actividades", [["PK", "id"], ["", "titulo"], ["", "fecha / hora"], ["", "materia"], ["FK", "profesor_id"]]);
+  b += tablaEr(420, 340, 250, "asignaciones", [["PK", "actividad_id"], ["PK", "estudiante_id"], ["", "estado"]]);
+  b += tablaEr(760, 90, 210, "bitacora", [["PK", "id"], ["", "tabla"], ["", "usuario_id"], ["", "fecha"]], C.oro);
 
-  const rel = (d, l, lx, ly) => camino(d) + (l ? texto(lx, ly, l, { size: 12, color: C.gris, peso: 700 }) : "");
-  b += rel("M165 194 L165 250", "1 : 1", 185, 228);
-  b += rel("M340 330 L440 250", "", 0, 0) + texto(322, 236, "1 : N (profesor)", { size: 12, color: C.gris, peso: 700, anchor: "start" });
-  b += rel("M340 440 L440 470", "", 0, 0) + texto(250, 492, "1 : N (estudiante)", { size: 12, color: C.gris, peso: 700, anchor: "start" });
-  b += rel("M595 336 L595 400", "1 : N", 620, 375);
-  b += `<path d="M40 330 C 0 330, 0 420, 40 420" fill="none" stroke="${C.linea}" stroke-width="1.8" marker-end="url(#fl)"/>`;
-  b += texto(18, 380, "tutor", { size: 12, color: C.gris, peso: 700 });
-  b += rel("M750 180 L820 180", "", 0, 0);
-  b += texto(785, 170, "audita", { size: 12, color: C.gris, peso: 700 });
+  b += camino("M300 165 L420 165") + texto(360, 155, "1 : N", { size: 13, color: C.gris, peso: 700 });
+  b += camino("M175 274 C 175 380, 300 400, 420 400") + texto(250, 395, "1 : N", { size: 13, color: C.gris, peso: 700 });
+  b += camino("M545 274 L545 340") + texto(575, 312, "1 : N", { size: 13, color: C.gris, peso: 700 });
+  b += camino("M670 150 L760 150") + texto(715, 138, "audita", { size: 13, color: C.gris, peso: 700 });
 
-  b += caja(820, 330, 250, 190, "Tipos (ENUM)", ["rol: estudiante | profesor | tutor", "estado: Pendiente |", "En proceso | Terminada", "", "Relación N:M actividades–", "estudiantes resuelta con", "la tabla asignaciones"], { align: "start", stroke: C.oro, fill: C.oroC, size: 14, ls: 12 });
-  diagramas["modelo-er"] = svg(1110, 560, b, "Modelo entidad-relación (PostgreSQL)");
+  b += texto(500, 500, "Una actividad puede ser para varios estudiantes y un estudiante tiene varias actividades.", { size: 14, color: C.gris });
+  b += texto(500, 522, "Esa relación y el avance de cada quien se guardan en «asignaciones».", { size: 14, color: C.gris });
+  diagramas["modelo-er"] = svg(1010, 550, b, "Modelo entidad-relación");
 }
 
 // 5. Mapa de navegación
 {
   let b = "";
-  const P = (x, y, t, s = [], o = {}) => caja(x, y, 190, 62, t, s, { size: 13.5, ls: 11.5, ...o });
-  b += P(405, 60, "01 Inicio / Iniciar sesión", ["Selección de perfil (demo)"], { fill: C.verdeC });
-  b += P(40, 185, "02 Inicio estudiante", ["Próximas + conteos"]);
-  b += P(40, 290, "03 Mis actividades", ["Filtros por estado"]);
-  b += P(40, 395, "04 Detalle de actividad", ["Cambiar estado"]);
-  b += P(405, 185, "05 Inicio profesor", ["Próximas + Registrar"]);
-  b += P(405, 290, "06 Actividades", ["Filtros, Editar, Eliminar"]);
-  b += P(295, 395, "07 Nueva actividad", ["Formulario validado"]);
-  b += P(515, 395, "08 Editar actividad", ["Formulario precargado"]);
-  b += P(295, 500, "09 Confirmar eliminación", ["Diálogo modal"], { stroke: C.rojo });
-  b += P(515, 500, "Detalle + avance", ["Estado por estudiante"]);
-  b += P(770, 185, "10 Inicio tutor", ["Lista de tutorados"]);
-  b += P(770, 290, "11 Tutorados", ["Matrícula y programa"]);
-  b += P(770, 395, "12 Info. del tutorado", ["Actividades y estados"]);
-  b += flecha(450, 122, 135, 185, { label: "rol estudiante", lx: 280, ly: 150 });
-  b += flecha(500, 122, 500, 185, { label: "rol profesor", lx: 500, ly: 150 });
-  b += flecha(550, 122, 865, 185, { label: "rol tutor", lx: 720, ly: 150 });
-  b += flecha(135, 247, 135, 290); b += flecha(135, 352, 135, 395);
-  b += flecha(500, 247, 500, 290); b += flecha(460, 352, 390, 395); b += flecha(540, 352, 610, 395);
-  b += camino("M405 321 L265 321 L265 531 L293 531", { dash: true }); b += camino("M595 321 L740 321 L740 531 L707 531");
-  b += flecha(865, 247, 865, 290); b += flecha(865, 352, 865, 395);
-  b += `<path d="M40 216 C 10 300, 10 380, 40 426" fill="none" stroke="${C.linea}" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#fl)"/>`;
-  b += texto(500, 610, "Barra inferior: Inicio · Actividades/Tutorados · (+) Registrar.  «Cerrar sesión» regresa a 01 desde cualquier pantalla.", { size: 12.5, color: C.gris });
-  b += texto(500, 630, "Las rutas están protegidas: un usuario solo accede a las pantallas de su rol.", { size: 12.5, color: C.gris });
-  diagramas["mapa-navegacion"] = svg(1000, 650, b, "Mapa de navegación (12 pantallas)");
+  const P = (x, y, t, s = []) => caja(x, y, 230, 62, t, s, { size: 15, ls: 12.5 });
+  b += caja(335, 65, 230, 62, "Iniciar sesión", [], { size: 16, fill: C.verdeC });
+  const cols = [
+    [50, "Estudiante", ["Inicio", "Mis actividades", "Detalle y cambiar estado"]],
+    [335, "Profesor", ["Inicio", "Actividades", "Registrar / editar / borrar"]],
+    [620, "Tutor", ["Inicio", "Tutorados", "Detalle del tutorado"]]
+  ];
+  cols.forEach(([x, rol, pantallas]) => {
+    b += texto(x + 115, 168, rol, { size: 16, peso: 700, color: C.verdeO });
+    pantallas.forEach((t, i) => {
+      const y = 185 + i * 100;
+      b += P(x, y, t);
+      if (i < pantallas.length - 1) b += flecha(x + 115, y + 62, x + 115, y + 100);
+    });
+  });
+  b += flecha(400, 127, 175, 182);
+  b += flecha(450, 127, 450, 182);
+  b += flecha(500, 127, 725, 182);
+  b += texto(450, 520, "Cada quien entra solo a las pantallas de su rol. «Cerrar sesión» regresa al inicio.", { size: 14, color: C.gris });
+  diagramas["mapa-navegacion"] = svg(900, 550, b, "Mapa de navegación");
 }
 
 // 6. Secuencia: registrar actividad
 {
-  const cols = [["Profesor", 80], ["Pantalla (Formulario)", 250], ["Dominio (reglas)", 420], ["SupabaseRepo", 590], ["PostgreSQL (RLS)", 770], ["Bitácora", 930]];
+  const cols = [["Profesor", 110], ["Pantalla", 320], ["Repositorio", 530], ["Base de datos", 740]];
   let b = "";
   for (const [n, x] of cols) {
-    b += caja(x - 75, 60, 150, 44, n, [], { size: 13, fill: C.verdeC });
-    b += `<line x1="${x}" y1="104" x2="${x}" y2="690" stroke="${C.linea}" stroke-width="1.2" stroke-dasharray="5 5"/>`;
+    b += caja(x - 85, 65, 170, 46, n, [], { size: 15, fill: C.verdeC });
+    b += `<line x1="${x}" y1="111" x2="${x}" y2="415" stroke="${C.linea}" stroke-width="1.2" stroke-dasharray="5 5"/>`;
   }
-  const m = (y, a, c, t, o = {}) => flecha(cols[a][1], y, cols[c][1] + (c > a ? -2 : 2), y, { label: t, lsize: 11.5, ly: y - 6, ...o });
-  b += m(140, 0, 1, "llena nombre, fecha, destinatario");
-  b += m(180, 1, 2, "validarActividad(datos)");
-  b += m(215, 2, 1, "errores = {} (válido)", { dash: true });
-  b += m(255, 1, 3, "guardarActividad(usuario, datos)");
-  b += m(295, 3, 2, "exigir(rol = profesor)");
-  b += m(330, 2, 3, "permitido", { dash: true });
-  b += m(370, 3, 4, "rpc guardar_actividad (JWT)");
-  b += `<rect x="700" y="390" width="140" height="150" rx="6" fill="${C.oroC}" stroke="${C.oro}"/>`;
-  b += texto(770, 410, "transacción", { size: 11.5, peso: 700, color: C.gris });
-  b += texto(770, 432, "mi_rol() = profesor", { size: 11 });
-  b += texto(770, 452, "INSERT actividades", { size: 11 });
-  b += texto(770, 472, "CHECK / RLS", { size: 11 });
-  b += texto(770, 492, "INSERT asignaciones", { size: 11 });
-  b += texto(770, 512, "(1 o todo el grupo)", { size: 11 });
-  b += m(565, 4, 5, "trigger: INSERT");
-  b += m(600, 4, 3, "id de la actividad", { dash: true });
-  b += m(635, 3, 1, "ok → mutar() refresca", { dash: true });
-  b += m(670, 1, 0, "«Actividad registrada» + lista", { dash: true });
-  b += texto(520, 715, "Si cualquier paso falla (permiso, CHECK, red) se revierte la transacción y la UI muestra un mensaje traducido.", { size: 12.5, color: C.gris });
-  diagramas["secuencia-registrar"] = svg(1010, 735, b, "Diagrama de secuencia · Registrar actividad (CU-06)");
+  const m = (y, a, c, t, o = {}) => flecha(cols[a][1], y, cols[c][1] + (c > a ? -2 : 2), y, { label: t, lsize: 13, ly: y - 7, ...o });
+  b += m(150, 0, 1, "llena el formulario");
+  b += texto(320, 185, "(revisa nombre y fecha)", { size: 13, color: C.gris, italic: true });
+  b += m(220, 1, 2, "guardar actividad");
+  b += m(270, 2, 3, "la guarda de una sola vez");
+  b += m(320, 3, 2, "listo", { dash: true });
+  b += m(365, 2, 1, "actualiza la lista", { dash: true });
+  b += m(405, 1, 0, "«Actividad registrada»", { dash: true });
+  b += texto(430, 450, "Si algo falla no se guarda nada y la pantalla avisa cuál fue el problema.", { size: 14, color: C.gris });
+  diagramas["secuencia-registrar"] = svg(860, 475, b, "Registrar una actividad, paso a paso");
 }
 
 // 7. Estados de una asignación
 {
   let b = "";
-  const E = (x, t, fill, stroke) => `<rect x="${x}" y="140" width="190" height="70" rx="35" fill="${fill}" stroke="${stroke}" stroke-width="2"/>` + texto(x + 95, 181, t, { size: 17, peso: 700 });
-  b += `<circle cx="60" cy="175" r="12" fill="${C.tinta}"/>`;
-  b += flecha(72, 175, 118, 175, { label: "asignar", ly: 160 });
-  b += E(120, "Pendiente", C.oroC, C.oro);
-  b += E(420, "En proceso", C.blanco, C.verde);
-  b += E(720, "Terminada", C.verdeC, C.verdeO);
-  b += camino("M310 160 C 350 130, 380 130, 420 160"); b += texto(365, 122, "estudiante inicia", { size: 12, color: C.gris });
-  b += camino("M420 195 C 380 225, 350 225, 310 195"); b += texto(365, 240, "regresa", { size: 12, color: C.gris });
-  b += camino("M610 160 C 650 130, 680 130, 720 160"); b += texto(665, 122, "estudiante termina", { size: 12, color: C.gris });
-  b += camino("M720 195 C 680 225, 650 225, 610 195"); b += texto(665, 240, "reabre", { size: 12, color: C.gris });
-  b += camino("M215 210 C 300 320, 740 320, 815 212"); b += texto(515, 324, "termina directamente", { size: 12, color: C.gris });
-  b += camino("M815 140 C 740 40, 300 40, 215 138"); b += texto(515, 52, "reinicia", { size: 12, color: C.gris });
-  b += texto(470, 350, "Solo el estudiante asignado cambia su estado (RLS + privilegio de columna «estado»).", { size: 12.5, color: C.gris });
-  b += texto(470, 370, "El profesor ve el estado global: todas Terminada → Terminada · todas Pendiente → Pendiente · otro caso → En proceso (RN-07).", { size: 12.5, color: C.gris });
-  diagramas["estados-asignacion"] = svg(960, 395, b, "Diagrama de estados · Asignación de actividad");
+  const E = (x, t, fill, stroke) => `<rect x="${x}" y="115" width="190" height="70" rx="35" fill="${fill}" stroke="${stroke}" stroke-width="2"/>` + texto(x + 95, 157, t, { size: 18, peso: 700 });
+  b += `<circle cx="55" cy="150" r="12" fill="${C.tinta}"/>`;
+  b += flecha(67, 150, 108, 150);
+  b += E(110, "Pendiente", C.oroC, C.oro);
+  b += E(400, "En proceso", C.blanco, C.verde);
+  b += E(690, "Terminada", C.verdeC, C.verdeO);
+  b += camino("M300 135 C 340 105, 360 105, 400 135") + texto(350, 97, "empieza", { size: 14, color: C.gris });
+  b += camino("M400 170 C 360 200, 340 200, 300 170") + texto(350, 220, "regresa", { size: 14, color: C.gris });
+  b += camino("M590 135 C 630 105, 650 105, 690 135") + texto(640, 97, "termina", { size: 14, color: C.gris });
+  b += camino("M690 170 C 650 200, 630 200, 590 170") + texto(640, 220, "la reabre", { size: 14, color: C.gris });
+  b += texto(450, 280, "Solo el estudiante al que se le asignó puede cambiar su propio estado.", { size: 14, color: C.gris });
+  diagramas["estados-asignacion"] = svg(900, 305, b, "Estados de una actividad asignada");
 }
 
 // 8. Flujo Git y CI/CD
 {
   let b = "";
-  b += texto(40, 110, "main", { size: 14, peso: 700, color: C.verdeO, anchor: "start" });
-  b += texto(40, 205, "feature/", { size: 13, peso: 700, color: C.azul, anchor: "start" });
-  b += texto(40, 222, "base-de-datos", { size: 13, peso: 700, color: C.azul, anchor: "start" });
-  b += texto(40, 285, "feature/pruebas-", { size: 13, peso: 700, color: C.oro, anchor: "start" });
-  b += texto(40, 302, "y-documentacion", { size: 13, peso: 700, color: C.oro, anchor: "start" });
-  b += `<line x1="160" y1="105" x2="1230" y2="105" stroke="${C.verde}" stroke-width="4"/>`;
-  b += `<path d="M300 105 C 330 105, 330 205, 360 205 L 800 205 C 830 205, 830 105, 860 105" fill="none" stroke="${C.azul}" stroke-width="4"/>`;
-  b += `<path d="M880 105 C 910 105, 910 290, 940 290 L 1120 290 C 1150 290, 1150 105, 1180 105" fill="none" stroke="${C.oro}" stroke-width="4"/>`;
+  b += texto(60, 115, "main", { size: 15, peso: 700, color: C.verdeO, anchor: "start" });
+  b += texto(60, 205, "rama nueva", { size: 15, peso: 700, color: C.azul, anchor: "start" });
+  b += `<line x1="170" y1="110" x2="840" y2="110" stroke="${C.verde}" stroke-width="4"/>`;
+  b += `<path d="M300 110 C 330 110, 330 200, 360 200 L 580 200 C 610 200, 610 110, 640 110" fill="none" stroke="${C.azul}" stroke-width="4"/>`;
   const n = (x, y, c) => `<circle cx="${x}" cy="${y}" r="9" fill="#fff" stroke="${c}" stroke-width="3"/>`;
-  b += n(190, 105, C.verde) + texto(190, 85, "ea662cd", { size: 11, color: C.gris }) + texto(190, 135, "prototipo PWA v1", { size: 11, color: C.verdeO });
-  b += n(270, 105, C.verde) + texto(270, 85, "b64ba2e", { size: 11, color: C.gris }) + texto(270, 150, "normalizar EOL", { size: 11, color: C.verdeO });
-  const feats = [["4ad00c7", "esquema BD + RLS"], ["e4aa616", "dominio"], ["c8a8960", "repositorio"], ["7ae1dd0", "UI + sesión"], ["7829568", "seed / verificación"], ["af18634", "pruebas E2E"], ["2a4d088", "seguridad + CI"]];
-  feats.forEach(([h, l], i) => {
-    const x = 385 + i * 65, abajo = i % 2 === 0;
-    b += n(x, 205, C.azul) + texto(x, abajo ? 235 : 185, h, { size: 10.5, color: C.gris }) + texto(x, abajo ? 250 : 170, l, { size: 10.5, color: C.azul });
-  });
-  b += n(860, 105, C.verde) + texto(860, 85, "40a496c merge", { size: 11, color: C.gris });
-  const docs = [["1271325", "prueba intermitente"], ["cb62a61", "accesibilidad AA"], ["2ce6ed7", "documentación"]];
-  docs.forEach(([h, l], i) => {
-    const x = 965 + i * 70;
-    b += n(x, 290, C.oro) + texto(x, 320, h, { size: 10.5, color: C.gris }) + texto(x, i % 2 ? 350 : 335, l, { size: 10.5, color: C.oro });
-  });
-  b += n(1020, 105, C.verde) + texto(1020, 85, "12bdcc0", { size: 11, color: C.gris }) + texto(1020, 135, "README (GitHub)", { size: 11, color: C.verdeO });
-  b += n(1180, 105, C.verde) + texto(1180, 85, "13ed376 merge v1.0", { size: 11, color: C.gris });
+  b += n(230, 110, C.verde) + texto(230, 88, "primera versión", { size: 13, color: C.gris });
+  b += n(420, 200, C.azul) + texto(420, 232, "voy programando", { size: 13, color: C.azul });
+  b += n(520, 200, C.azul) + texto(520, 252, "y probando", { size: 13, color: C.azul });
+  b += n(640, 110, C.verde) + texto(650, 88, "se une a main (merge)", { size: 13, color: C.gris });
+  b += n(800, 110, C.verde) + texto(800, 88, "v1.0.0", { size: 13, color: C.gris });
 
-  const etapas = [["Commit / push", "Conventional Commits"], ["GitHub Actions", "npm ci + npm audit"], ["Compilación", "tsc + vite build"], ["Pruebas", "unitarias, BD, UI, E2E"], ["Vercel", "despliegue automático"]];
+  const etapas = [["Subo el cambio", "git push"], ["GitHub lo compila", "npm run build"], ["Corre las pruebas", "solas, sin que yo esté"], ["Vercel publica", "la nueva versión"]];
   etapas.forEach(([t, s], i) => {
-    const x = 90 + i * 225;
-    b += caja(x, 420, 190, 70, t, [s], { size: 14, fill: i === 4 ? C.azulC : C.verdeC, stroke: i === 4 ? C.azul : C.verde });
-    if (i < etapas.length - 1) b += flecha(x + 190, 455, x + 225, 455);
+    const x = 55 + i * 230;
+    b += caja(x, 320, 190, 72, t, [s], { size: 15, fill: i === 3 ? C.azulC : C.verdeC, stroke: i === 3 ? C.azul : C.verde });
+    if (i < etapas.length - 1) b += flecha(x + 190, 356, x + 230, 356);
   });
-  b += texto(635, 400, "Integración y entrega continua (CI/CD)", { size: 15, peso: 700, color: C.verdeO });
-  b += texto(635, 525, "Cada cambio se integra por rama con merge --no-ff; main solo recibe código que compila y pasa las pruebas.", { size: 12.5, color: C.gris });
-  diagramas["git-cicd"] = svg(1270, 550, b, "Control de versiones (Git) y canal de CI/CD");
+  b += texto(470, 300, "Lo que pasa en cada cambio", { size: 16, peso: 700, color: C.verdeO });
+  b += texto(470, 430, "A main solo llega código que compila y que pasa todas las pruebas.", { size: 14, color: C.gris });
+  diagramas["git-cicd"] = svg(940, 455, b, "Ramas de Git y publicación automática");
 }
 
 // 9. Pirámide de pruebas
 {
   let b = "";
   const niveles = [
-    ["E2E (Playwright + axe-core)", "28 casos · teléfono y tablet · WCAG AA", 470, C.azulC, C.azul],
-    ["Integración UI (Testing Library)", "17 flujos: login y los 3 roles", 400, C.verdeC, C.verde],
-    ["Integración con Supabase real", "5 pruebas + 23 verificaciones RLS", 330, C.verdeC, C.verde],
-    ["Base de datos (PostgreSQL/PGlite)", "19 pruebas: integridad, RLS, auditoría", 260, C.oroC, C.oro],
-    ["Unitarias (Vitest)", "44 pruebas: reglas, repositorio, despliegue", 190, C.oroC, C.oro]
+    ["Pruebas E2E", "28 casos en teléfono y tableta", C.azulC, C.azul],
+    ["Interfaz y base de datos", "41 pruebas", C.verdeC, C.verde],
+    ["Pruebas unitarias", "44 pruebas de reglas y permisos", C.oroC, C.oro]
   ];
-  niveles.forEach(([t, s, , fill, stroke], i) => {
-    const y = 70 + i * 78, mitad = 90 + i * 70;
-    b += `<polygon points="${500 - mitad},${y + 72} ${500 + mitad},${y + 72} ${500 + mitad - 35},${y} ${500 - mitad + 35},${y}" fill="${fill}" stroke="${stroke}" stroke-width="1.6"/>`;
-    b += texto(500, y + 32, t, { size: 14, peso: 700 });
-    b += texto(500, y + 52, s, { size: 12, color: C.gris });
+  niveles.forEach(([t, s, fill, stroke], i) => {
+    const y = 75 + i * 95, mitad = 110 + i * 100;
+    b += `<polygon points="${400 - mitad},${y + 88} ${400 + mitad},${y + 88} ${400 + mitad - 50},${y} ${400 - mitad + 50},${y}" fill="${fill}" stroke="${stroke}" stroke-width="1.6"/>`;
+    b += texto(400, y + 42, t, { size: 16, peso: 700 });
+    b += texto(400, y + 65, s, { size: 13.5, color: C.gris });
   });
-  b += texto(500, 490, "Más rápidas y numerosas en la base; más realistas (y lentas) en la cima.", { size: 12.5, color: C.gris });
-  diagramas["piramide-pruebas"] = svg(1000, 510, b, "Estrategia de pruebas");
+  b += texto(400, 400, "Abajo van muchas pruebas chicas y rápidas; arriba, pocas pero más parecidas al uso real.", { size: 14, color: C.gris });
+  diagramas["piramide-pruebas"] = svg(800, 425, b, "Cómo probé la aplicación");
 }
 
 for (const [nombre, contenido] of Object.entries(diagramas)) {

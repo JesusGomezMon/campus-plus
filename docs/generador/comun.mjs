@@ -8,8 +8,8 @@ import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
 export const RAIZ = fileURLToPath(new URL("../../", import.meta.url));
-export const IMG = RAIZ + "docs/img/";
-export const SALIDA = RAIZ + "docs/entregables/";
+const IMG = RAIZ + "docs/img/";
+const SALIDA = RAIZ + "docs/entregables/";
 mkdirSync(SALIDA, { recursive: true });
 
 export const DATOS = {
@@ -18,7 +18,7 @@ export const DATOS = {
   fecha: "19 de septiembre de 2026",
   version: "1.0",
   repo: "https://github.com/JesusGomezMon/campus-plus",
-  organizacion: "Universidad Autónoma del Estado de Quintana Roo (organización cliente del caso de estudio)"
+  organizacion: "Universidad Autónoma del Estado de Quintana Roo"
 };
 
 const VERDE = "0B5124", VERDE_M = "17833C", VERDE_C = "EAF5EC", GRIS = "5C5C58", ORO_C = "FBF3D4";
@@ -37,10 +37,9 @@ function runs(texto, base = {}) {
 export const p = (texto, o = {}) =>
   new Paragraph({ children: runs(texto, o.run), spacing: { after: 120, line: 276 }, alignment: o.align ?? AlignmentType.JUSTIFIED, ...o.par });
 export const h1 = (t) => new Paragraph({ heading: HeadingLevel.HEADING_1, children: [new TextRun(t)], pageBreakBefore: true });
-export const h1SinSalto = (t) => new Paragraph({ heading: HeadingLevel.HEADING_1, children: [new TextRun(t)] });
 export const h2 = (t) => new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun(t)] });
 export const h3 = (t) => new Paragraph({ heading: HeadingLevel.HEADING_3, children: [new TextRun(t)] });
-export const salto = () => new Paragraph({ children: [new PageBreak()] });
+const salto = () => new Paragraph({ children: [new PageBreak()] });
 
 export const vinetas = (items, nivel = 0) =>
   items.map((t) => new Paragraph({ numbering: { reference: "vinetas", level: nivel }, children: runs(t), spacing: { after: 60 } }));
@@ -206,9 +205,9 @@ async function portada(titulo, subtitulo, descripcion) {
       width: { size: ANCHO, type: WidthType.DXA },
       columnWidths: [2600, 6760],
       rows: [
-        fila("Aplicación", "Campus+ · PWA de gestión de actividades (tareas) por rol"),
+        fila("Aplicación", "Campus+ · app web para organizar actividades escolares"),
         fila("Autor", DATOS.autor),
-        fila("Organización cliente", DATOS.organizacion),
+        fila("Caso de estudio", DATOS.organizacion),
         fila("Repositorio", DATOS.repo),
         fila("Versión del documento", DATOS.version),
         fila("Fecha", DATOS.fecha)
