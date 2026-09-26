@@ -36,7 +36,7 @@ function runs(texto, base = {}) {
 
 export const p = (texto, o = {}) =>
   new Paragraph({ children: runs(texto, o.run), spacing: { after: 120, line: 276 }, alignment: o.align ?? AlignmentType.JUSTIFIED, ...o.par });
-export const h1 = (t) => new Paragraph({ heading: HeadingLevel.HEADING_1, children: [new TextRun(t)], pageBreakBefore: true });
+export const h1 = (t) => new Paragraph({ heading: HeadingLevel.HEADING_1, children: [new TextRun(t)] });
 export const h2 = (t) => new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun(t)] });
 export const h3 = (t) => new Paragraph({ heading: HeadingLevel.HEADING_3, children: [new TextRun(t)] });
 const salto = () => new Paragraph({ children: [new PageBreak()] });

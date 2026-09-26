@@ -1,7 +1,22 @@
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Navigate, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useApp } from "../app/contexto";
 import type { Rol } from "../domain/tipos";
+
+/** Avisa cuando el dispositivo se queda sin internet, para explicar por qué falla guardar. */
+function useEnLinea(): boolean {
+  const [enLinea, setEnLinea] = useState(() => (typeof navigator === "undefined" ? true : navigator.onLine !== false));
+  useEffect(() => {
+    const actualizar = () => setEnLinea(navigator.onLine !== false);
+    window.addEventListener("online", actualizar);
+    window.addEventListener("offline", actualizar);
+    return () => {
+      window.removeEventListener("online", actualizar);
+      window.removeEventListener("offline", actualizar);
+    };
+  }, []);
+  return enLinea;
+}
 
 const TABS: Record<Rol, { label: string; to: string; end?: boolean; aria?: string }[]> = {
   estudiante: [
@@ -26,6 +41,7 @@ const TABS: Record<Rol, { label: string; to: string; end?: boolean; aria?: strin
 export function Shell({ rol }: { rol: Rol }) {
   const navigate = useNavigate();
   const { usuario, cargandoSesion, salir } = useApp();
+  const enLinea = useEnLinea();
 
   if (cargandoSesion) return <div className="app" aria-busy="true" />;
   if (!usuario) return <Navigate to="/" replace />;
@@ -33,6 +49,11 @@ export function Shell({ rol }: { rol: Rol }) {
 
   return (
     <div className="app">
+      {!enLinea && (
+        <p className="net-bar" role="status">
+          Sin conexión: puedes consultar lo que ya cargó, pero los cambios no se guardarán.
+        </p>
+      )}
       <div className="userbar">
         <span>{usuario.nombre}</span>
         <button

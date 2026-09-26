@@ -23,24 +23,25 @@ export async function generar() {
     ["Primero el teléfono", "Una sola columna en el celular; en tableta las listas pasan a dos columnas."],
     ["Botones grandes", "Botones de 44 a 64 px de alto y la barra de abajo donde alcanza el pulgar."],
     ["Que todo se vea igual", "Todas las pantallas llevan la misma estructura."],
+    ["Aprovechar la pantalla grande", "En el teléfono la navegación va abajo; de 720 px en adelante se convierte en una barra lateral fija."],
     ["Evitar errores", "Los mensajes de error salen junto al campo, y antes de borrar pide confirmación."],
     ["Accesibilidad", "Buen contraste, etiqueta en cada campo y foco visible."]
   ], [26, 74]));
 
   // 3
   c.push(h1("3. Colores y componentes"));
-  c.push(p("Los colores vienen del prototipo. Al probar la accesibilidad vi que el verde original (#1E9E4A) con texto blanco no daba el contraste mínimo que pide WCAG AA, así que lo cambié por #17833C."));
+  c.push(p("Los colores son los del design system de la universidad: verde institucional #00492C, oro #CAA600 y esquinas casi rectas (2 px). Al principio usé el verde del prototipo (#1E9E4A), pero con texto blanco no llegaba al contraste mínimo que pide WCAG AA; el institucional da 11.8:1, muy por encima del 4.5:1 exigido."));
   c.push(tituloTabla("Paleta de colores"));
   c.push(tabla(["Color", "Dónde se usa"], [
-    ["#17833C (verde)", "Botones, pestaña activa y filtros activos"],
-    ["#EAF5EC (verde claro)", "Banda de título, pestañas inactivas y avatar"],
-    ["#CAA600 (dorado)", "Estado «Pendiente»"],
-    ["#9D2020 (rojo)", "Botón de eliminar"],
-    ["#1C1C1A / #6B6B68", "Texto principal y texto secundario"]
-  ], [30, 70]));
+    ["#00492C (verde institucional)", "Botones, filtro activo y sección activa de la barra lateral"],
+    ["#E8EFEB (verde claro)", "Banda de título y avatar"],
+    ["#CAA600 (oro)", "Estado «Pendiente»"],
+    ["#9D2020 (rojo)", "Botón de eliminar y etiqueta «Fecha vencida»"],
+    ["#201E1D / #6B6B68", "Texto principal y texto secundario"]
+  ], [34, 66]));
   c.push(...vinetas([
     "**Tipografía:** Lato. Títulos de 24–30 px y texto de 14–17 px. Los campos van en 16 px porque si son más chicos iOS acerca la pantalla solo.",
-    "**Estados:** Pendiente (dorado), En proceso (contorno verde) y Terminada (verde claro). Se distinguen por el texto y no nada más por el color."
+    "**Estados:** Pendiente (oro), En proceso (contorno verde) y Terminada (verde claro). Se distinguen por el texto y no nada más por el color. Si la fecha ya pasó y la actividad no está terminada, además sale la etiqueta «Fecha vencida»."
   ]));
 
   // 4
@@ -73,14 +74,23 @@ export async function generar() {
     { ruta: "pantallas/11-tutor-tutorados.png", pie: "Tutorados con matrícula y programa." },
     { ruta: "pantallas/12-tutor-detalle.png", pie: "Información del tutorado." }
   ], 3, 165));
-  c.push(h2("4.5 En tableta"));
-  c.push(p("De 700 px para arriba las listas se acomodan en dos columnas para aprovechar el espacio."));
+  c.push(h2("4.5 En tableta y en computadora"));
+  c.push(p("De 700 px para arriba las listas se acomodan en dos columnas, y de 720 px en adelante la barra de navegación se pasa al costado izquierdo, con el nombre de la app arriba y la sección activa marcada."));
   c.push(await rejilla([
     { ruta: "pantallas/13-tablet-profesor-actividades.png", pie: "Actividades del profesor en tableta.", ancho: 290 },
     { ruta: "pantallas/14-tablet-estudiante-actividades.png", pie: "Mis actividades en tableta.", ancho: 290 }
   ], 2));
   c.push(h2("4.6 Mapa de navegación"));
   c.push(...(await figura("diagramas/mapa-navegacion.png", "Cómo se pasa de una pantalla a otra.", 560)));
+  c.push(h2("4.7 Detalles de la app instalable"));
+  c.push(tituloTabla("Detalles que agregué por ser una app instalable"));
+  c.push(tabla(["Detalle", "Para qué sirve"], [
+    ["Botón «Instalar aplicación»", "Se puede instalar desde la misma pantalla de inicio, sin buscar la opción del navegador."],
+    ["Aviso de «Sin conexión»", "Aparece una barra arriba cuando se cae el internet, para que se entienda por qué no guarda."],
+    ["Accesos directos del icono", "Al dejar presionado el icono instalado salen tres atajos: mis actividades, registrar actividad y tutorados."],
+    ["El filtro en la dirección", "La lista filtrada se puede recargar o mandar por mensaje y sigue mostrando lo mismo."],
+    ["«Restablecer datos de demostración»", "Deja la app como al principio, para volver a enseñarla desde cero."]
+  ], [30, 70]));
 
   // 5
   c.push(h1("5. Arquitectura"));

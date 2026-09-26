@@ -2,16 +2,23 @@ import { useState, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useApp, useConsulta } from "../app/contexto";
 import { Screen } from "../components/Shell";
-import { ConDatos, ConfirmDialog, Datos, EstadoTag, Filtros, PillButton, Vacio, type Filtro } from "../components/ui";
-import { avance, estadoGlobal, LIMITES, porFecha, validarActividad, type ErroresActividad } from "../domain/reglas";
+import { ConDatos, ConfirmDialog, Datos, EstadoTag, Filtros, Leyenda, PillButton, Vacio, VencidaTag, useFiltro } from "../components/ui";
+import { avance, estadoGlobal, LIMITES, validarActividad, type ErroresActividad } from "../domain/reglas";
+import { TAM_PAGINA } from "../data/repositorio";
+import { lista } from "../domain/tipos";
 import type { ActividadInput, ActividadProfesor, Estudiante } from "../domain/tipos";
 import { fechaHora, fechaLarga, primerNombre } from "../utils";
 import NoEncontrado from "./NoEncontrado";
 
-function useActividadesProfesor() {
-  return useConsulta(async (repo, u) =>
-    (await repo.actividadesProfesor(u)).sort(porFecha).map((a) => ({ ...a, estado: estadoGlobal(a.asignaciones) }))
-  );
+/** El servidor ya devuelve las actividades ordenadas y recortadas al límite pedido. */
+function useActividadesProfesor(limite?: number) {
+  return useConsulta(async (repo, u) => {
+    const filas = await repo.actividadesProfesor(u, limite);
+    return lista(
+      filas.map((a) => ({ ...a, estado: estadoGlobal(a.asignaciones) })),
+      filas.hayMas
+    );
+  }, [limite]);
 }
 
 function destinatario(a: ActividadProfesor): string {
@@ -82,8 +89,9 @@ export function DashProfesor() {
 
 export function ActividadesProfesor() {
   const navigate = useNavigate();
-  const consulta = useActividadesProfesor();
-  const [filtro, setFiltro] = useState<Filtro>("Todas");
+  const [limite, setLimite] = useState(TAM_PAGINA);
+  const consulta = useActividadesProfesor(limite);
+  const [filtro, setFiltro] = useFiltro();
   const { pedir, dialogo } = useEliminar();
 
   return (
@@ -94,6 +102,7 @@ export function ActividadesProfesor() {
           const lista = todas.filter((a) => filtro === "Todas" || a.estado === filtro);
           return (
             <>
+              <Leyenda visibles={lista.length} filtro={filtro} />
               <div className="list">
                 {lista.map((a) => (
                   <article key={a.id} className="card">
@@ -102,7 +111,10 @@ export function ActividadesProfesor() {
                       <span className="card-meta">{destinatario(a)}</span>
                       <span className="card-meta">{fechaHora(a)}</span>
                     </button>
-                    <EstadoTag estado={a.estado} className="self-start" />
+                    <div className="row-actions" style={{ marginTop: 0 }}>
+                      <EstadoTag estado={a.estado} />
+                      <VencidaTag a={a} />
+                    </div>
                     <div className="row-actions">
                       <button type="button" className="btn btn-primary" onClick={() => navigate(`/profesor/actividades/${a.id}/editar`)}>Editar</button>
                       <button type="button" className="btn btn-danger-outline" onClick={() => pedir(a)}>Eliminar</button>
@@ -111,6 +123,11 @@ export function ActividadesProfesor() {
                 ))}
               </div>
               {lista.length === 0 && <Vacio>No hay actividades con este estado.</Vacio>}
+              {todas.hayMas && (
+                <button type="button" className="btn btn-secondary btn-block" onClick={() => setLimite((n) => n + TAM_PAGINA)}>
+                  Mostrar más actividades
+                </button>
+              )}
             </>
           );
         }}

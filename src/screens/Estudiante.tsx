@@ -2,14 +2,16 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useApp, useConsulta } from "../app/contexto";
 import { Screen } from "../components/Shell";
-import { ActividadResumen, ConDatos, Datos, EstadoTag, Filtros, PillButton, Vacio, type Filtro } from "../components/ui";
-import { contarPorEstado, porFecha, proximas } from "../domain/reglas";
+import { ActividadResumen, ConDatos, Datos, EstadoTag, Filtros, Leyenda, PillButton, Vacio, VencidaTag, useFiltro } from "../components/ui";
+import { contarPorEstado, proximas } from "../domain/reglas";
+import { TAM_PAGINA } from "../data/repositorio";
 import { ESTADOS } from "../domain/tipos";
 import { fechaHora, fechaLarga, primerNombre } from "../utils";
 import NoEncontrado from "./NoEncontrado";
 
-function useMisActividades() {
-  return useConsulta(async (repo, u) => (await repo.misActividades(u)).sort(porFecha));
+/** El servidor ya devuelve las actividades ordenadas y recortadas al límite pedido. */
+function useMisActividades(limite?: number) {
+  return useConsulta((repo, u) => repo.misActividades(u, limite), [limite]);
 }
 
 export function DashEstudiante() {
@@ -50,8 +52,9 @@ export function DashEstudiante() {
 
 export function MisActividades() {
   const navigate = useNavigate();
-  const consulta = useMisActividades();
-  const [filtro, setFiltro] = useState<Filtro>("Todas");
+  const [limite, setLimite] = useState(TAM_PAGINA);
+  const consulta = useMisActividades(limite);
+  const [filtro, setFiltro] = useFiltro();
 
   return (
     <Screen title="Mis actividades">
@@ -61,14 +64,21 @@ export function MisActividades() {
           const lista = mias.filter((a) => filtro === "Todas" || a.estado === filtro);
           return (
             <>
+              <Leyenda visibles={lista.length} filtro={filtro} />
               <div className="list">
                 {lista.map((a) => (
                   <button key={a.id} type="button" className="card card-btn" onClick={() => navigate(`/estudiante/actividades/${a.id}`)}>
                     <ActividadResumen a={a} />
+                    <VencidaTag a={a} />
                   </button>
                 ))}
               </div>
               {lista.length === 0 && <Vacio>No hay actividades con este estado.</Vacio>}
+              {mias.hayMas && (
+                <button type="button" className="btn btn-secondary btn-block" onClick={() => setLimite((n) => n + TAM_PAGINA)}>
+                  Mostrar más actividades
+                </button>
+              )}
             </>
           );
         }}

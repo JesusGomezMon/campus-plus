@@ -81,7 +81,7 @@ export async function generar() {
     ["RF-02", "Que cada pantalla sea solo para su rol.", "Todos", "Must"],
     ["RF-03", "Mostrarle al estudiante sus 3 próximas actividades sin terminar, ordenadas por fecha.", "Estudiante", "Must"],
     ["RF-04", "Mostrarle cuántas actividades tiene en cada estado.", "Estudiante", "Should"],
-    ["RF-05", "Listar sus actividades y poder filtrarlas por estado.", "Estudiante", "Must"],
+    ["RF-05", "Listar sus actividades y filtrarlas por estado; el filtro se queda en la dirección, así que la lista se puede recargar o compartir.", "Estudiante", "Must"],
     ["RF-06", "Ver el detalle de una actividad: descripción, materia, fecha y profesor.", "Estudiante", "Must"],
     ["RF-07", "Cambiar el estado de una actividad propia.", "Estudiante", "Must"],
     ["RF-08", "Registrar una actividad y asignarla a un estudiante o al grupo completo.", "Profesor", "Must"],
@@ -98,14 +98,14 @@ export async function generar() {
   c.push(h1("5. Requerimientos no funcionales"));
   c.push(tituloTabla("Requerimientos no funcionales"));
   c.push(tabla(["ID", "Atributo", "Requerimiento", "Resultado V1"], [
-    ["RNF-01", "Uso en el teléfono", "Diseñar primero para el celular, con botones grandes y sin scroll horizontal.", "Cumple"],
+    ["RNF-01", "Uso en el teléfono", "Diseñar primero para el celular, con botones grandes; en pantallas grandes la navegación pasa a una barra lateral.", "Cumple"],
     ["RNF-02", "Accesibilidad", "Cumplir WCAG 2.1 nivel AA: contraste, etiquetas y foco visible.", "0 violaciones"],
-    ["RNF-03", "Rendimiento", "Que la primera pantalla se vea en menos de 2.5 s en móvil.", "1.8 s"],
+    ["RNF-03", "Rendimiento", "Que la primera pantalla se vea en menos de 2.5 s en móvil.", "2.0 s"],
     ["RNF-04", "Autenticación", "Contraseñas cifradas y sesión con un token que expira.", "Cumple"],
     ["RNF-05", "Permisos", "Que cada rol vea y cambie solo lo suyo, revisado en el servidor.", "Cumple"],
     ["RNF-06", "Integridad", "Validar en la pantalla y en la base de datos; guardar todo junto o nada.", "Cumple"],
     ["RNF-07", "Auditoría", "Guardar quién crea, cambia o borra información.", "Cumple"],
-    ["RNF-08", "Mantenibilidad", "Código tipado, separado en capas y con pruebas; cobertura ≥ 80 %.", "91.6 %"]
+    ["RNF-08", "Mantenibilidad", "Código tipado, separado en capas y con pruebas; cobertura ≥ 80 %.", "92.1 %"]
   ], [10, 18, 54, 18], { tam: 17 }));
 
   // 6

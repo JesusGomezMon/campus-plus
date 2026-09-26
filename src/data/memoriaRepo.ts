@@ -1,7 +1,17 @@
 import { exigir, normalizarActividad, validarActividad } from "../domain/reglas";
-import type { ActividadAlumno, ActividadInput, ActividadProfesor, Estado, Estudiante, Rol, Usuario } from "../domain/tipos";
-import { ErrorDominio } from "../domain/tipos";
-import type { Repositorio } from "./repositorio";
+import type { ActividadAlumno, ActividadInput, ActividadProfesor, Estado, Estudiante, Lista, Rol, Usuario } from "../domain/tipos";
+import { ErrorDominio, lista } from "../domain/tipos";
+import { TOPE_CONSULTA, type Repositorio } from "./repositorio";
+
+/** Ordena igual que la base de datos: por fecha, luego hora (sin hora al final) y luego id. */
+function porEntrega(a: { fecha: string; hora: string; id: number }, b: { fecha: string; hora: string; id: number }): number {
+  return a.fecha.localeCompare(b.fecha) || (a.hora || "99:99").localeCompare(b.hora || "99:99") || a.id - b.id;
+}
+
+/** Recorta la lista al tope pedido y avisa si quedaban más, como hace el servidor. */
+function recortar<T>(filas: T[], limite: number): Lista<T> {
+  return lista(filas.slice(0, limite), filas.length > limite);
+}
 import { ACTIVIDADES, ASIGNACIONES, ESTUDIANTES, PROFESOR, TUTOR, TUTOR_DE, USUARIO_DEMO, type ActividadSemilla, type AsignacionSemilla } from "./seed";
 
 interface Estado_ {
@@ -96,9 +106,9 @@ export class MemoriaRepo implements Repositorio {
       });
   }
 
-  async misActividades(u: Usuario): Promise<ActividadAlumno[]> {
+  async misActividades(u: Usuario, limite = TOPE_CONSULTA): Promise<Lista<ActividadAlumno>> {
     exigir(u, "verMisActividades");
-    return this.delEstudiante(u.id);
+    return recortar(this.delEstudiante(u.id).sort(porEntrega), limite);
   }
 
   async cambiarEstado(u: Usuario, actividadId: number, estado: Estado): Promise<void> {
@@ -109,21 +119,23 @@ export class MemoriaRepo implements Repositorio {
     this.guardar();
   }
 
-  async actividadesProfesor(u: Usuario): Promise<ActividadProfesor[]> {
+  async actividadesProfesor(u: Usuario, limite = TOPE_CONSULTA): Promise<Lista<ActividadProfesor>> {
     exigir(u, "gestionarActividades");
-    return this.datos.actividades
+    const filas = this.datos.actividades
       .filter((a) => a.profesorId === u.id)
       .map((a) => ({
         ...this.base(a),
         asignaciones: this.datos.asignaciones
           .filter((s) => s.actividadId === a.id)
           .map((s) => ({ estudianteId: s.estudianteId, estudianteNombre: this.nombre(s.estudianteId), estado: s.estado }))
-      }));
+      }))
+      .sort(porEntrega);
+    return recortar(filas, limite);
   }
 
-  async estudiantes(u: Usuario): Promise<Estudiante[]> {
+  async estudiantes(u: Usuario): Promise<Lista<Estudiante>> {
     exigir(u, "gestionarActividades");
-    return ESTUDIANTES.map((e) => ({ ...e }));
+    return recortar(ESTUDIANTES.map((e) => ({ ...e })), TOPE_CONSULTA);
   }
 
   async guardarActividad(u: Usuario, entrada: ActividadInput, id?: number): Promise<number> {
@@ -168,15 +180,15 @@ export class MemoriaRepo implements Repositorio {
     this.guardar();
   }
 
-  async tutorados(u: Usuario): Promise<Estudiante[]> {
+  async tutorados(u: Usuario): Promise<Lista<Estudiante>> {
     exigir(u, "verTutorados");
-    return ESTUDIANTES.filter((e) => TUTOR_DE[e.id] === u.id).map((e) => ({ ...e }));
+    return recortar(ESTUDIANTES.filter((e) => TUTOR_DE[e.id] === u.id).map((e) => ({ ...e })), TOPE_CONSULTA);
   }
 
-  async actividadesDeTutorado(u: Usuario, estudianteId: string): Promise<ActividadAlumno[]> {
+  async actividadesDeTutorado(u: Usuario, estudianteId: string, limite = TOPE_CONSULTA): Promise<Lista<ActividadAlumno>> {
     exigir(u, "verTutorados");
     if (TUTOR_DE[estudianteId] !== u.id) throw new ErrorDominio("Este estudiante no es tu tutorado.", "permiso");
-    return this.delEstudiante(estudianteId);
+    return recortar(this.delEstudiante(estudianteId).sort(porEntrega), limite);
   }
 }
 

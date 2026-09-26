@@ -68,3 +68,14 @@ export class ErrorDominio extends Error {
     this.name = "ErrorDominio";
   }
 }
+
+/**
+ * Lista que además avisa si en el servidor quedaban más registros de los que
+ * se pidieron. Se comporta como un arreglo normal, así que el código que solo
+ * recorre los resultados no necesita saber que está paginado.
+ */
+export type Lista<T> = T[] & { hayMas: boolean };
+
+export function lista<T>(filas: T[], hayMas = false): Lista<T> {
+  return Object.assign(filas, { hayMas });
+}

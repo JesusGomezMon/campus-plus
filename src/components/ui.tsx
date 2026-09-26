@@ -1,11 +1,29 @@
 import { useEffect, useRef, type ReactNode } from "react";
+import { useSearchParams } from "react-router-dom";
 import type { Consulta } from "../app/contexto";
 import { useApp } from "../app/contexto";
 import { ESTADOS, type ActividadAlumno, type Estado } from "../domain/tipos";
-import { fechaHora, tagClass } from "../utils";
+import { fechaHora, tagClass, vencida } from "../utils";
 
 export type Filtro = "Todas" | Estado;
 const FILTROS: Filtro[] = ["Todas", ...ESTADOS];
+
+/**
+ * El filtro por estado vive en la dirección (?estado=Pendiente), no en el componente:
+ * así la lista filtrada se puede recargar o compartir y sigue mostrando lo mismo.
+ */
+export function useFiltro(): [Filtro, (f: Filtro) => void] {
+  const [params, setParams] = useSearchParams();
+  const enUrl = params.get("estado");
+  const value = (FILTROS as string[]).includes(enUrl ?? "") ? (enUrl as Filtro) : "Todas";
+  const set = (f: Filtro) => {
+    const siguiente = new URLSearchParams(params);
+    if (f === "Todas") siguiente.delete("estado");
+    else siguiente.set("estado", f);
+    setParams(siguiente, { replace: true });
+  };
+  return [value, set];
+}
 
 export function Filtros({ value, onChange }: { value: Filtro; onChange: (f: Filtro) => void }) {
   return (
@@ -19,8 +37,20 @@ export function Filtros({ value, onChange }: { value: Filtro; onChange: (f: Filt
   );
 }
 
+/** "3 actividades en total" / "1 actividad con estado terminada". */
+export function Leyenda({ visibles, filtro }: { visibles: number; filtro: Filtro }) {
+  const base = `${visibles} ${visibles === 1 ? "actividad" : "actividades"}`;
+  return <p className="leyenda">{filtro === "Todas" ? `${base} en total` : `${base} con estado ${filtro.toLowerCase()}`}</p>;
+}
+
 export function EstadoTag({ estado, className = "" }: { estado: Estado; className?: string }) {
   return <span className={tagClass(estado) + " " + className}>{estado}</span>;
+}
+
+/** Aviso de que la fecha de entrega ya pasó y la actividad sigue sin terminarse. */
+export function VencidaTag({ a }: { a: Pick<ActividadAlumno, "fecha" | "estado"> }) {
+  if (!vencida(a)) return null;
+  return <span className="tag tag-vencida">Fecha vencida</span>;
 }
 
 /** Botón verde grande usado en los tableros ("Próximas actividades", tutorados). */

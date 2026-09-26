@@ -25,7 +25,7 @@ export async function generar() {
     ["Licencia de uso", "Proyecto escolar"],
     ["Tamaño del código", `${lSrc} líneas de aplicación y ${lTest} líneas de pruebas`]
   ], [30, 70]));
-  c.push(p("Traté de que el código quedara ordenado: está escrito en TypeScript, separado en capas para que cada parte tenga una sola responsabilidad y tiene 113 pruebas automáticas con 91.6 % de cobertura."));
+  c.push(p("Traté de que el código quedara ordenado: está escrito en TypeScript, separado en capas para que cada parte tenga una sola responsabilidad y tiene 118 pruebas automáticas con 92.1 % de cobertura."));
 
   c.push(h1("2. Tecnologías"));
   c.push(tituloTabla("Tecnologías que usé"));
@@ -130,10 +130,10 @@ npm run test:e2e  # corre la app completa en teléfono y tableta`));
   c.push(tituloTabla("Indicadores"));
   c.push(tabla(["Indicador", "Valor"], [
     ["Errores al compilar", "0"],
-    ["Pruebas automatizadas", "113 (todas pasan)"],
-    ["Cobertura de código", "91.6 %"],
+    ["Pruebas automatizadas", "118 (todas pasan)"],
+    ["Cobertura de código", "92.1 %"],
     ["Vulnerabilidades en las dependencias", "0"],
-    ["Lighthouse (rendimiento / accesibilidad)", "98 / 100"]
+    ["Lighthouse (rendimiento / accesibilidad)", "97 / 100"]
   ], [60, 40]));
   c.push(h2("7.1 Un pedazo del código"));
   c.push(p("Así protejo las pantallas: si no hay sesión, mando al inicio; si el rol no coincide, mando a la pantalla que sí le toca."));

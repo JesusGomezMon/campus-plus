@@ -27,6 +27,20 @@ describe("vercel.json", () => {
     expect(globales["X-Content-Type-Options"]).toBe("nosniff");
   });
 
+  it("bloquea contenido embebido y fuerza HTTPS", () => {
+    expect(globales["Content-Security-Policy"]).toMatch(/object-src 'none'/);
+    expect(globales["Content-Security-Policy"]).toMatch(/upgrade-insecure-requests/);
+    expect(globales["X-Frame-Options"]).toBe("DENY");
+    expect(globales["Cross-Origin-Opener-Policy"]).toBe("same-origin");
+  });
+
+  it("guarda la aplicación en caché pero nunca el service worker", () => {
+    const sw = config.headers.find((h) => h.source === "/sw.js")!.headers.find((h) => h.key === "Cache-Control")!.value;
+    const assets = config.headers.find((h) => h.source === "/assets/(.*)")!.headers.find((h) => h.key === "Cache-Control")!.value;
+    expect(sw).toMatch(/max-age=0/);
+    expect(assets).toMatch(/immutable/);
+  });
+
   it("permite conectarse a Supabase", () => {
     expect(globales["Content-Security-Policy"]).toMatch(/connect-src[^;]*https:\/\/\*\.supabase\.co/);
   });

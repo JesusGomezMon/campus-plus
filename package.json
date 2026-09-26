@@ -1,7 +1,7 @@
 {
   "name": "campus-plus",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.2.0",
   "type": "module",
   "scripts": {
     "dev": "vite --host",
@@ -16,7 +16,8 @@
     "verificar": "tsc -b && vitest run && playwright test",
     "db:verificar": "node --env-file=.env.local scripts/verificar-supabase.mjs",
     "test:integracion": "node --env-file=.env.local node_modules/vitest/vitest.mjs run tests/integracion",
-    "db:medir": "node --env-file=.env.local scripts/medir-supabase.mjs"
+    "db:medir": "node --env-file=.env.local scripts/medir-supabase.mjs",
+    "db:carga": "node --env-file=.env.local scripts/carga-supabase.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",

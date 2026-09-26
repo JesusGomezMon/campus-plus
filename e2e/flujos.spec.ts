@@ -11,8 +11,14 @@ test.describe("PWA", () => {
     const manifest = await page.request.get("/manifest.webmanifest");
     expect(manifest.ok()).toBeTruthy();
     const json = await manifest.json();
-    expect(json).toMatchObject({ name: "Campus +", display: "standalone", start_url: "/" });
+    expect(json).toMatchObject({ short_name: "Campus+", display: "standalone", start_url: "/", theme_color: "#00492C" });
     expect(json.icons.some((i: { purpose?: string }) => i.purpose === "maskable")).toBeTruthy();
+    // Accesos directos del icono instalado: uno por rol.
+    expect(json.shortcuts.map((s: { url: string }) => s.url)).toEqual([
+      "/estudiante/actividades",
+      "/profesor/actividades/nueva",
+      "/tutor/tutorados"
+    ]);
     await expect.poll(() => page.evaluate(async () => !!(await navigator.serviceWorker.getRegistration())), { timeout: 10_000 }).toBeTruthy();
   });
 

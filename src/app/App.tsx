@@ -1,11 +1,31 @@
-import { useEffect } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { Shell } from "../components/Shell";
 import { Toast } from "../components/ui";
 import Home from "../screens/Home";
-import { DashEstudiante, DetalleActividad, MisActividades } from "../screens/Estudiante";
-import { ActividadesProfesor, DashProfesor, DetalleProfesor, FormActividad } from "../screens/Profesor";
-import { DashTutor, DetalleTutorado, Tutorados } from "../screens/Tutor";
+
+/**
+ * Las pantallas de cada rol se cargan solo cuando hacen falta (code splitting).
+ * Así la primera carga baja únicamente el inicio de sesión, y no las pantallas
+ * de los tres roles: un estudiante nunca descarga el formulario del profesor.
+ */
+const pantalla = <M extends Record<string, React.ComponentType>, K extends keyof M>(carga: () => Promise<M>, nombre: K) =>
+  lazy(() => carga().then((m) => ({ default: m[nombre] })));
+
+const cargaEstudiante = () => import("../screens/Estudiante");
+const cargaProfesor = () => import("../screens/Profesor");
+const cargaTutor = () => import("../screens/Tutor");
+
+const DashEstudiante = pantalla(cargaEstudiante, "DashEstudiante");
+const MisActividades = pantalla(cargaEstudiante, "MisActividades");
+const DetalleActividad = pantalla(cargaEstudiante, "DetalleActividad");
+const DashProfesor = pantalla(cargaProfesor, "DashProfesor");
+const ActividadesProfesor = pantalla(cargaProfesor, "ActividadesProfesor");
+const DetalleProfesor = pantalla(cargaProfesor, "DetalleProfesor");
+const FormActividad = pantalla(cargaProfesor, "FormActividad");
+const DashTutor = pantalla(cargaTutor, "DashTutor");
+const Tutorados = pantalla(cargaTutor, "Tutorados");
+const DetalleTutorado = pantalla(cargaTutor, "DetalleTutorado");
 
 /** Vuelve al inicio de la página en cada cambio de pantalla. */
 function ScrollArriba() {
@@ -21,6 +41,7 @@ export function App() {
   return (
     <>
       <ScrollArriba />
+      <Suspense fallback={<div className="app" aria-busy="true" />}>
       <Routes>
         <Route path="/" element={<Home />} />
 
@@ -46,6 +67,7 @@ export function App() {
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </Suspense>
       <Toast />
     </>
   );

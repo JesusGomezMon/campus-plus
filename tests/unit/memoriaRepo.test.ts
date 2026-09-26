@@ -30,6 +30,25 @@ describe("MemoriaRepo (adaptador de demostración)", () => {
     expect(await repo.sesionActual()).toBeNull();
   });
 
+  it("recorta la lista al límite pedido y avisa que quedan más", async () => {
+    const dos = await repo.misActividades(ana, 2);
+    expect(dos.length).toBe(2);
+    expect(dos.hayMas).toBe(true);
+
+    const todas = await repo.misActividades(ana, 50);
+    expect(todas.length).toBe(4);
+    expect(todas.hayMas).toBe(false);
+
+    // La primera página trae las primeras de la lista completa, no otras cualesquiera.
+    expect(dos.map((a) => a.id)).toEqual(todas.slice(0, 2).map((a) => a.id));
+  });
+
+  it("devuelve las actividades ordenadas por fecha y hora desde el repositorio", async () => {
+    const mias = await repo.misActividades(ana);
+    const claves = mias.map((a) => `${a.fecha} ${a.hora || "99:99"}`);
+    expect(claves).toEqual([...claves].sort());
+  });
+
   it("el estudiante solo ve sus propias actividades", async () => {
     const mias = await repo.misActividades(ana);
     expect(mias.length).toBe(4);

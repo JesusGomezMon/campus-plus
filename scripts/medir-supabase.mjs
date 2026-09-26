@@ -24,8 +24,8 @@ const prof = await sesion("profesor@campusplus.test");
 const tutor = await sesion("tutor@campusplus.test");
 const COLS = "id, titulo, descripcion, materia, fecha, hora, para_grupo, profesor_id, profesor:profiles!actividades_profesor_id_fkey(nombre)";
 const resultados = [
-  await medir("Estudiante: mis actividades (asignaciones + actividad + profesor)", () => ana.sb.from("asignaciones").select(`estado, actividad:actividades(${COLS})`).eq("estudiante_id", ana.uid)),
-  await medir("Profesor: actividades con avance por estudiante", () => prof.sb.from("actividades").select(`${COLS}, asignaciones(estudiante_id, estado, estudiante:profiles!asignaciones_estudiante_id_fkey(nombre))`).eq("profesor_id", prof.uid)),
+  await medir("Estudiante: mis actividades (ordenadas y con LIMIT en el servidor)", () => ana.sb.from("actividades").select(`${COLS}, asignaciones!inner(estado, estudiante_id)`).eq("asignaciones.estudiante_id", ana.uid).order("fecha").order("hora", { nullsFirst: false }).order("id").limit(201)),
+  await medir("Profesor: actividades con avance por estudiante", () => prof.sb.from("actividades").select(`${COLS}, asignaciones(estudiante_id, estado, estudiante:profiles!asignaciones_estudiante_id_fkey(nombre))`).eq("profesor_id", prof.uid).order("fecha").order("hora", { nullsFirst: false }).order("id").limit(201)),
   await medir("Tutor: lista de tutorados", () => tutor.sb.from("profiles").select("id, nombre, matricula, programa").eq("tutor_id", tutor.uid)),
   await medir("Estudiante: cambiar estado (UPDATE con RLS)", () => ana.sb.from("asignaciones").update({ estado: "Pendiente" }).eq("estudiante_id", ana.uid).eq("actividad_id", -1).select())
 ];

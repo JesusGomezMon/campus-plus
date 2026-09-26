@@ -145,6 +145,15 @@ describe("Flujo del estudiante", () => {
     expect(screen.queryByText("Ejercicio de Física")).not.toBeInTheDocument();
   });
 
+  it("abre la lista ya filtrada si la dirección trae ?estado=", async () => {
+    const repo = new MemoriaRepo(almacen());
+    await repo.iniciarSesion({ rol: "estudiante" });
+    montar("/estudiante/actividades?estado=Terminada", repo);
+    expect(await screen.findByText("Cuestionario unidad 1")).toBeInTheDocument();
+    expect(screen.queryByText("Ejercicio de Física")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Terminada" })).toHaveAttribute("aria-pressed", "true");
+  });
+
   it("muestra 'No encontrado' para una actividad inexistente", async () => {
     const repo = new MemoriaRepo(almacen());
     await repo.iniciarSesion({ rol: "estudiante" });

@@ -1,8 +1,8 @@
 import type { PostgrestError, SupabaseClient } from "@supabase/supabase-js";
 import { exigir, normalizarActividad, validarActividad } from "../domain/reglas";
-import type { Actividad, ActividadAlumno, ActividadInput, ActividadProfesor, Estado, Estudiante, Rol, Usuario } from "../domain/tipos";
-import { ErrorDominio } from "../domain/tipos";
-import type { Repositorio } from "./repositorio";
+import type { Actividad, ActividadAlumno, ActividadInput, ActividadProfesor, Estado, Estudiante, Lista, Rol, Usuario } from "../domain/tipos";
+import { ErrorDominio, lista } from "../domain/tipos";
+import { TOPE_CONSULTA, type Repositorio } from "./repositorio";
 
 /** Columnas que se leen de una actividad (incluye el nombre del profesor). */
 const COLS_ACTIVIDAD = "id, titulo, descripcion, materia, fecha, hora, para_grupo, profesor_id, profesor:profiles!actividades_profesor_id_fkey(nombre)";
@@ -103,20 +103,33 @@ export class SupabaseRepo implements Repositorio {
   }
 
   // ---------- Estudiante / tutor ----------
-  private async actividadesDe(estudianteId: string): Promise<ActividadAlumno[]> {
+  /**
+   * La consulta arranca en `actividades` (no en `asignaciones`) para que PostgreSQL
+   * pueda ordenar por fecha y hora y recortar con LIMIT antes de mandar la respuesta.
+   * Se pide un registro de más: si llega, es que quedaban otros por leer.
+   */
+  private async actividadesDe(estudianteId: string, limite: number): Promise<Lista<ActividadAlumno>> {
     const filas = ok(
       await this.sb
-        .from("asignaciones")
-        .select(`estado, actividad:actividades(${COLS_ACTIVIDAD})`)
-        .eq("estudiante_id", estudianteId)
-        .returns<{ estado: Estado; actividad: FilaActividad | null }[]>()
+        .from("actividades")
+        .select(`${COLS_ACTIVIDAD}, asignaciones!inner(estado, estudiante_id)`)
+        .eq("asignaciones.estudiante_id", estudianteId)
+        .order("fecha")
+        .order("hora", { nullsFirst: false })
+        .order("id")
+        .limit(limite + 1)
+        .returns<(FilaActividad & { asignaciones: { estado: Estado }[] })[]>()
     );
-    return filas.flatMap((f) => (f.actividad ? [{ ...aActividad(f.actividad), estado: f.estado }] : []));
+    const hayMas = filas.length > limite;
+    return lista(
+      filas.slice(0, limite).map((f) => ({ ...aActividad(f), estado: f.asignaciones[0]?.estado ?? "Pendiente" })),
+      hayMas
+    );
   }
 
-  async misActividades(u: Usuario): Promise<ActividadAlumno[]> {
+  async misActividades(u: Usuario, limite = TOPE_CONSULTA): Promise<Lista<ActividadAlumno>> {
     exigir(u, "verMisActividades");
-    return this.actividadesDe(u.id);
+    return this.actividadesDe(u.id, limite);
   }
 
   async cambiarEstado(u: Usuario, actividadId: number, estado: Estado): Promise<void> {
@@ -127,41 +140,61 @@ export class SupabaseRepo implements Repositorio {
     if (!filas.length) throw new ErrorDominio("La actividad no existe o no está asignada a ti.", "no-encontrado");
   }
 
-  async tutorados(u: Usuario): Promise<Estudiante[]> {
+  async tutorados(u: Usuario): Promise<Lista<Estudiante>> {
     exigir(u, "verTutorados");
     const filas = ok(
-      await this.sb.from("profiles").select("id, nombre, rol, matricula, programa").eq("tutor_id", u.id).order("nombre").returns<FilaPerfil[]>()
+      await this.sb
+        .from("profiles")
+        .select("id, nombre, rol, matricula, programa")
+        .eq("tutor_id", u.id)
+        .order("nombre")
+        .limit(TOPE_CONSULTA + 1)
+        .returns<FilaPerfil[]>()
     );
-    return filas.map(aEstudiante);
+    return lista(filas.slice(0, TOPE_CONSULTA).map(aEstudiante), filas.length > TOPE_CONSULTA);
   }
 
-  async actividadesDeTutorado(u: Usuario, estudianteId: string): Promise<ActividadAlumno[]> {
+  async actividadesDeTutorado(u: Usuario, estudianteId: string, limite = TOPE_CONSULTA): Promise<Lista<ActividadAlumno>> {
     exigir(u, "verTutorados");
-    return this.actividadesDe(estudianteId);
+    return this.actividadesDe(estudianteId, limite);
   }
 
   // ---------- Profesor ----------
-  async actividadesProfesor(u: Usuario): Promise<ActividadProfesor[]> {
+  async actividadesProfesor(u: Usuario, limite = TOPE_CONSULTA): Promise<Lista<ActividadProfesor>> {
     exigir(u, "gestionarActividades");
     const filas = ok(
       await this.sb
         .from("actividades")
         .select(`${COLS_ACTIVIDAD}, asignaciones(estudiante_id, estado, estudiante:profiles!asignaciones_estudiante_id_fkey(nombre))`)
         .eq("profesor_id", u.id)
+        .order("fecha")
+        .order("hora", { nullsFirst: false })
+        .order("id")
+        .limit(limite + 1)
         .returns<(FilaActividad & { asignaciones: { estudiante_id: string; estado: Estado; estudiante: { nombre: string } | null }[] })[]>()
     );
-    return filas.map((f) => ({
-      ...aActividad(f),
-      asignaciones: f.asignaciones.map((s) => ({ estudianteId: s.estudiante_id, estudianteNombre: s.estudiante?.nombre ?? "—", estado: s.estado }))
-    }));
+    const hayMas = filas.length > limite;
+    return lista(
+      filas.slice(0, limite).map((f) => ({
+        ...aActividad(f),
+        asignaciones: f.asignaciones.map((s) => ({ estudianteId: s.estudiante_id, estudianteNombre: s.estudiante?.nombre ?? "—", estado: s.estado }))
+      })),
+      hayMas
+    );
   }
 
-  async estudiantes(u: Usuario): Promise<Estudiante[]> {
+  async estudiantes(u: Usuario): Promise<Lista<Estudiante>> {
     exigir(u, "gestionarActividades");
     const filas = ok(
-      await this.sb.from("profiles").select("id, nombre, rol, matricula, programa").eq("rol", "estudiante").order("nombre").returns<FilaPerfil[]>()
+      await this.sb
+        .from("profiles")
+        .select("id, nombre, rol, matricula, programa")
+        .eq("rol", "estudiante")
+        .order("nombre")
+        .limit(TOPE_CONSULTA + 1)
+        .returns<FilaPerfil[]>()
     );
-    return filas.map(aEstudiante);
+    return lista(filas.slice(0, TOPE_CONSULTA).map(aEstudiante), filas.length > TOPE_CONSULTA);
   }
 
   async guardarActividad(u: Usuario, entrada: ActividadInput, id?: number): Promise<number> {

@@ -1,28 +1,40 @@
-/* Campus + — estilos basados en el diseño "Campus+ V2 Móvil" */
+/* Campus + — estilos del design system institucional (verde #00492C, oro #CAA600, Lato) */
+
+/* La tipografía vive en el propio sitio: evita una conexión a Google en cada
+   carga (más rápido) y que el navegador del usuario pida algo a un tercero. */
+@font-face { font-family: "Lato"; font-style: normal; font-weight: 400; font-display: swap; src: url("/fonts/lato-400.woff2") format("woff2"); }
+@font-face { font-family: "Lato"; font-style: normal; font-weight: 700; font-display: swap; src: url("/fonts/lato-700.woff2") format("woff2"); }
+@font-face { font-family: "Lato"; font-style: normal; font-weight: 900; font-display: swap; src: url("/fonts/lato-900.woff2") format("woff2"); }
+
 :root {
-  /* Verdes del diseño; el de relleno es accent-600 para cumplir contraste WCAG AA (4.8:1 con blanco) */
-  --green: #17833c;
-  --green-600: #0f6b2f;
-  --green-700: #0b5124;
-  --green-800: #0b5124;
-  --green-100: #eaf5ec;
-  --green-200: #c9e6d2;
+  /* Verde institucional; con texto blanco da 11.8:1, muy por encima del 4.5:1 que pide WCAG AA */
+  --green: #00492c;
+  --green-600: #003a22;
+  --green-700: #002d1a;
+  --green-800: #00301d;
+  --green-100: #e8efeb;
+  --green-200: #c9dbd1;
+  --green-wash: #f2f6f3;
   --gold: #caa600;
   --gold-100: #fbf3d4;
   --gold-800: #5d4c00;
-  --ink: #1c1c1a;
+  --ink: #201e1d;
   --ink-soft: #3d3d3a;
   --muted: #6b6b68;
   --faint: #73736f;
   --line: #eeeeea;
   --border: #e4e4e0;
   --border-strong: #d9d9d5;
+  --surface: #f5f5f3;
   --field: #f1f1ef;
   --danger: #9d2020;
-  --radius: 10px;
+  --danger-100: #fbeceb;
+  --radius: 2px;
+  --radius-lg: 4px;
   --maxw: 900px;
   --btnw: 340px;
   --nav-h: 76px;
+  --sidebar-w: 216px;
   --safe-b: env(safe-area-inset-bottom, 0px);
   --safe-t: env(safe-area-inset-top, 0px);
   color-scheme: light;
@@ -112,7 +124,7 @@ h1, h2, h3, p { margin: 0; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: var(--radius);
   background: var(--green-100);
   color: var(--green-800);
   font-size: 14px;
@@ -284,7 +296,7 @@ h1, h2, h3, p { margin: 0; }
   font-size: 12px;
   letter-spacing: 0.02em;
   padding: 3px 10px;
-  border-radius: 6px;
+  border-radius: var(--radius);
   border: 1px solid transparent;
 }
 .tag-pendiente { background: var(--gold-100); color: var(--gold-800); }
@@ -327,7 +339,7 @@ h1, h2, h3, p { margin: 0; }
   width: 100%;
   background: var(--field);
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: var(--radius);
   padding: 0 12px;
   font-size: 16px; /* evita el zoom automático en iOS */
   appearance: none;
@@ -360,7 +372,7 @@ select.input {
 .dialog {
   width: min(440px, 100%);
   background: #fff;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   padding: 22px 20px 20px;
   display: flex;
   flex-direction: column;
@@ -391,7 +403,7 @@ select.input {
   font-size: 14px;
   font-weight: 700;
   padding: 12px 18px;
-  border-radius: 10px;
+  border-radius: var(--radius);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
   animation: rise 0.2s ease-out;
 }
@@ -423,3 +435,73 @@ select.input {
 .toast-error { background: var(--danger); }
 .form-narrow { width: 100%; max-width: var(--btnw); margin: 0 auto; }
 .btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+/* — aviso de conexión — */
+.net-bar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--gold-100);
+  color: var(--gold-800);
+  border-bottom: 1px solid var(--gold);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  padding: 8px 20px;
+}
+
+/* — etiqueta de actividad vencida — */
+.tag-vencida { background: var(--danger-100); color: var(--danger); border-color: var(--danger); }
+.leyenda { font-size: 13px; color: var(--muted); }
+
+/* — escritorio: la barra inferior se convierte en barra lateral — */
+@media (min-width: 720px) {
+  :root { --nav-h: 0px; }
+  .app {
+    max-width: calc(var(--maxw) + var(--sidebar-w));
+    padding-left: var(--sidebar-w);
+  }
+  .app-home { max-width: var(--maxw); padding-left: 0; }
+  .bottom-nav {
+    top: 0;
+    bottom: 0;
+    right: auto;
+    left: max(0px, calc((100vw - var(--maxw) - var(--sidebar-w)) / 2));
+    width: var(--sidebar-w);
+    background: var(--surface);
+    backdrop-filter: none;
+    border-top: 0;
+    border-right: 1px solid var(--border);
+    padding: 28px 14px;
+    display: flex;
+    flex-direction: column;
+  }
+  .bottom-nav::before {
+    content: "Campus+";
+    font-size: 19px;
+    font-weight: 900;
+    color: var(--green);
+    padding: 0 14px 20px;
+  }
+  .bottom-nav-inner {
+    max-width: none;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 4px;
+  }
+  .tab {
+    min-width: 0;
+    width: 100%;
+    justify-content: flex-start;
+    padding: 12px 14px;
+    background: transparent;
+    color: var(--ink-soft);
+    border-left: 3px solid transparent;
+  }
+  .tab.is-active { background: var(--green-100); color: var(--green-800); border-left-color: var(--green); }
+  .tab-plus { font-size: 0; }
+  .tab-plus::after { content: "Registrar actividad"; font-size: 14px; }
+  .screen { padding-bottom: 48px; }
+  .toast-region { bottom: 24px; }
+}
